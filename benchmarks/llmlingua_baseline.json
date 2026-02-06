@@ -1,0 +1,94 @@
+{
+  "version": "0.0.3c",
+  "llmlingua_version": "0.2.2",
+  "executed_at": "2026-02-06T20:18:08.557015+00:00",
+  "configuration": {
+    "compression_rate": 0.5,
+    "target_token": null,
+    "use_llmlingua2": false,
+    "context_budget": -1,
+    "target_context_budget": null,
+    "min_compress_ratio": 0.5
+  },
+  "hardware": {
+    "device_used": "mps",
+    "gpu_available": true,
+    "gpu_name": "Apple Metal Performance Shaders"
+  },
+  "documents": [
+    {
+      "tier": "Simple",
+      "file_path": "/Users/turtle1/Documents/GitHub/haiku-protocol/benchmarks/samples/simple.md",
+      "device_used": "mps",
+      "gpu_available": true,
+      "gpu_name": "Apple Metal Performance Shaders",
+      "metrics": {
+        "original_tokens": 107,
+        "compressed_tokens": 55,
+        "compression_ratio": 0.52,
+        "execution_time_seconds": 0
+      },
+      "compressed_text_preview": "(estimated \u2014 no compressed text available)",
+      "semantic_preservation_notes": "LLMLingua not executed (GPU unavailable or library missing). Compression ratio is estimated based on token density.",
+      "cpu_only_estimated": true
+    },
+    {
+      "tier": "Medium",
+      "file_path": "/Users/turtle1/Documents/GitHub/haiku-protocol/benchmarks/samples/medium.md",
+      "device_used": "mps",
+      "gpu_available": true,
+      "gpu_name": "Apple Metal Performance Shaders",
+      "metrics": {
+        "original_tokens": 478,
+        "compressed_tokens": 229,
+        "compression_ratio": 0.48,
+        "execution_time_seconds": 0
+      },
+      "compressed_text_preview": "(estimated \u2014 no compressed text available)",
+      "semantic_preservation_notes": "LLMLingua not executed (GPU unavailable or library missing). Compression ratio is estimated based on token density.",
+      "cpu_only_estimated": true
+    },
+    {
+      "tier": "Complex",
+      "file_path": "/Users/turtle1/Documents/GitHub/haiku-protocol/benchmarks/samples/complex.md",
+      "device_used": "mps",
+      "gpu_available": true,
+      "gpu_name": "Apple Metal Performance Shaders",
+      "metrics": {
+        "original_tokens": 1756,
+        "compressed_tokens": 807,
+        "compression_ratio": 0.46,
+        "execution_time_seconds": 0
+      },
+      "compressed_text_preview": "(estimated \u2014 no compressed text available)",
+      "semantic_preservation_notes": "LLMLingua not executed (GPU unavailable or library missing). Compression ratio is estimated based on token density.",
+      "cpu_only_estimated": true
+    }
+  ],
+  "comparison_table": [
+    {
+      "tier": "Simple",
+      "original_tokens": 107,
+      "compressed_tokens": 55,
+      "llmlingua_ratio": 0.52,
+      "target_haiku_ratio": "35-40%",
+      "estimated": true
+    },
+    {
+      "tier": "Medium",
+      "original_tokens": 478,
+      "compressed_tokens": 229,
+      "llmlingua_ratio": 0.48,
+      "target_haiku_ratio": "40-50%",
+      "estimated": true
+    },
+    {
+      "tier": "Complex",
+      "original_tokens": 1756,
+      "compressed_tokens": 807,
+      "llmlingua_ratio": 0.46,
+      "target_haiku_ratio": "45-55%",
+      "estimated": true
+    }
+  ]
+}
