@@ -1,0 +1,97 @@
+{
+  "meta": {
+    "total_sources": 4,
+    "generated_at": "2026-02-06T01:30:34.345883",
+    "inclusion_threshold": 3.5
+  },
+  "sources": [
+    {
+      "authors": "Huiqiang Jiang, Qianhui Wu, Chin-Yew Lin, Yuqing Yang, Lili Qiu",
+      "year": 2023,
+      "title": "LLMLingua: Compressing Prompts for Accelerated Inference of Large Language Models",
+      "venue": "EMNLP 2023 (Proceedings of the 2023 Conference on Empirical Methods in Natural Language Processing), pages 13358-13376",
+      "doi_or_url": "https://doi.org/10.18653/v1/2023.emnlp-main.825",
+      "key_finding": "Coarse-to-fine prompt compression using budget controller, token-level iterative compression, and instruction tuning achieves up to 20x compression with minimal performance loss.",
+      "methodology": "Hybrid (extractive + LLM-guided token selection). Uses small LM (GPT-2/LLaMA-7B) to rank token importance via iterative compression with budget control.",
+      "compression_ratio": "Up to 20x compression (95% token reduction); 1.7x-5.7x inference speedup across GSM8K, BBH, ShareGPT, and Arxiv-March23 benchmarks.",
+      "relevance_score": 5,
+      "relevance_justification": "Weighted rubric score: 4.90/5.00 (relevance_to_compression=5, methodology_rigor=5, empirical_results=5, reproducibility=5, semantic_preservation=4). Most directly addresses prompt compression with semantic preservation; most cited work in the field.",
+      "reproducibility_status": "Code available (MIT license) at github.com/microsoft/LLMLingua; pip install llmlingua",
+      "summary": "LLMLingua uses a pre-trained small language model to rank token importance and selectively prune low-information tokens through iterative compression. A budget controller maintains semantic integrity under high compression ratios, while instruction tuning aligns the distribution between the small ranking model and the target LLM. Evaluated on question answering, reasoning, and summarization tasks.",
+      "limitations": [
+        "Requires access to a small LM for token-level importance ranking",
+        "Assumes certain prompt structure (demonstrations + question + context)",
+        "Performance varies significantly by task type and domain",
+        "Token-level decisions may miss inter-sentence semantic dependencies"
+      ],
+      "haiku_relevance": "Pioneering work that validates semantic compression over naive truncation. LLMLingua's statistical token pruning contrasts with Haiku Protocol's grammar-driven CNL approach -- LLMLingua removes tokens while Haiku restructures information into a controlled natural language. Their compression ratios (up to 20x) set the benchmark to match or exceed.",
+      "date_reviewed": "2026-02-06T01:30:34.345758"
+    },
+    {
+      "authors": "Yucheng Li, Bo Dong, Frank Guerin, Chenghua Lin",
+      "year": 2023,
+      "title": "Compressing Context to Enhance Inference Efficiency of Large Language Models",
+      "venue": "EMNLP 2023 (Proceedings of the 2023 Conference on Empirical Methods in Natural Language Processing), pages 6342-6353",
+      "doi_or_url": "https://doi.org/10.18653/v1/2023.emnlp-main.391",
+      "key_finding": "Self-information-based pruning of lexical units identifies and removes redundant tokens, achieving 50% context cost reduction with minimal quality loss (0.023 BERTScore drop).",
+      "methodology": "Extractive. Computes self-information via causal LM (GPT-2/OPT/LLaMA), merges tokens into lexical units (sentences, phrases, or tokens), and eliminates low-information content.",
+      "compression_ratio": "50% context cost reduction (retains 57.2% of tokens); 36% reduction in inference memory; 32% reduction in inference time.",
+      "relevance_score": 4,
+      "relevance_justification": "Weighted rubric score: 4.35/5.00 (relevance_to_compression=5, methodology_rigor=4, empirical_results=4, reproducibility=5, semantic_preservation=3). Directly validates the redundancy hypothesis central to Haiku Protocol but uses purely statistical methods without semantic restructuring.",
+      "reproducibility_status": "Code available (MIT license) at github.com/liyucheng09/Selective_Context; pip install selective-context",
+      "summary": "Selective Context enhances LLM inference efficiency by computing self-information scores for lexical units using a base language model, then pruning units below an informativeness threshold. Evaluated on summarization, QA, code generation, and conversational tasks, showing that substantial context can be removed with minimal quality degradation.",
+      "limitations": [
+        "Self-information metric is purely statistical with no semantic understanding",
+        "Evaluation focused primarily on English-language tasks",
+        "Extractive only -- cannot restructure or rewrite content",
+        "May remove contextually important but statistically redundant tokens"
+      ],
+      "haiku_relevance": "Validates the hypothesis that human-written text contains significant redundancy from an LLM's perspective (~40-50% removable). The self-information approach is purely statistical -- Haiku Protocol's CNL grammar could achieve similar or better compression with guaranteed semantic preservation through structured rewriting rather than blind pruning.",
+      "date_reviewed": "2026-02-06T01:30:34.345764"
+    },
+    {
+      "authors": "Fangyuan Xu, Weijia Shi, Eunsol Choi",
+      "year": 2023,
+      "title": "RECOMP: Improving Retrieval-Augmented LMs with Compression and Selective Augmentation",
+      "venue": "arXiv 2023 (arXiv:2310.04408); published at ICLR 2024 (The Twelfth International Conference on Learning Representations)",
+      "doi_or_url": "https://arxiv.org/abs/2310.04408",
+      "key_finding": "Compresses retrieved documents into textual summaries using trained extractive and abstractive compressors, achieving compression to as low as 6% of original length with minimal performance loss.",
+      "methodology": "Hybrid (extractive sentence selection + abstractive summary generation). Both compressors are trained end-to-end to optimize downstream task performance rather than generic summarization quality.",
+      "compression_ratio": "As low as 6% of original document length (94% reduction); significantly outperforms off-the-shelf summarization models on downstream tasks.",
+      "relevance_score": 4,
+      "relevance_justification": "Weighted rubric score: 4.25/5.00 (relevance_to_compression=4, methodology_rigor=5, empirical_results=4, reproducibility=4, semantic_preservation=4). Dual extractive/abstractive approach parallels Haiku Protocol's pipeline, but focused on RAG context rather than general prompt compression.",
+      "reproducibility_status": "Code available at github.com/carriex/recomp",
+      "summary": "RECOMP trains two types of compressors for retrieval-augmented LMs: an extractive compressor that selects useful sentences from retrieved documents, and an abstractive compressor that generates concise summaries synthesizing information across multiple documents. Includes selective augmentation that returns an empty string when retrieval adds no value. Evaluated on language modeling and open-domain QA.",
+      "limitations": [
+        "Focused on retrieval-augmented generation (RAG) context, not general prompt compression",
+        "Requires task-specific training data for compressor models",
+        "Abstractive compressor may introduce hallucinated content",
+        "Evaluated primarily on language modeling and open-domain QA tasks"
+      ],
+      "haiku_relevance": "RECOMP's dual extractive/abstractive pipeline parallels Haiku Protocol's Extractor + Synthesizer architecture. The selective augmentation concept (returning empty when compression adds no value) informs the Validator's quality gates. Key difference: RECOMP trains neural compressors while Haiku Protocol uses grammar-defined CNL rules, making our approach more interpretable and deterministic.",
+      "date_reviewed": "2026-02-06T01:30:34.345767"
+    },
+    {
+      "authors": "Huiqiang Jiang, Qianhui Wu, Xufang Luo, Dongsheng Li, Chin-Yew Lin, Yuqing Yang, Lili Qiu",
+      "year": 2024,
+      "title": "LongLLMLingua: Accelerating and Enhancing LLMs in Long Context Scenarios via Prompt Compression",
+      "venue": "ACL 2024 (Proceedings of the 62nd Annual Meeting of the Association for Computational Linguistics, Volume 1: Long Papers), pages 1658-1677",
+      "doi_or_url": "https://doi.org/10.18653/v1/2024.acl-long.91",
+      "key_finding": "Addresses long-context prompt compression by improving key information density with question-aware compression, achieving up to 21.4% performance improvement with 4x fewer tokens.",
+      "methodology": "Hybrid (question-aware compression + key information density optimization). Extends LLMLingua with document reordering to address position bias and contrastive perplexity for improved key information retention in long contexts.",
+      "compression_ratio": "2x-6x compression on ~10k token prompts; 1.4x-2.6x end-to-end latency acceleration; up to 94% cost reduction on LooGLE benchmark.",
+      "relevance_score": 5,
+      "relevance_justification": "Weighted rubric score: 4.90/5.00 (relevance_to_compression=5, methodology_rigor=5, empirical_results=5, reproducibility=5, semantic_preservation=4). Extends the compression paradigm to long-context scenarios, directly validating the growing need that Haiku Protocol addresses.",
+      "reproducibility_status": "Code available (MIT license) at github.com/microsoft/LLMLingua; part of the LLMLingua project",
+      "summary": "LongLLMLingua extends the LLMLingua framework to long-context scenarios (10k+ tokens). It introduces question-aware compression that uses contrastive perplexity to better identify key information, document reordering to mitigate position bias in long contexts, and dynamic compression ratios across prompt components. Evaluated on NaturalQuestions, LongBench, and LooGLE benchmarks.",
+      "limitations": [
+        "Optimized for long-context question-answering scenarios specifically",
+        "Compression quality depends on having the downstream query available at compression time",
+        "Inherits LLMLingua's requirement for a small ranking LM",
+        "Position bias mitigation via document reordering is heuristic-based"
+      ],
+      "haiku_relevance": "Demonstrates that long-context compression is a growing concern, validating Haiku Protocol's problem space. LongLLMLingua's question-aware approach highlights a key limitation: it requires knowing the downstream query at compression time. Haiku Protocol's CNL compression is query-independent -- the grammar preserves all semantic content regardless of future use, making it more versatile for stored knowledge bases.",
+      "date_reviewed": "2026-02-06T01:30:34.345768"
+    }
+  ]
+}
