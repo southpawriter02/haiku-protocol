@@ -276,15 +276,18 @@ def compress_document(
         # We wrap the document in a list, which LLMLingua treats as a
         # single-context compression. The 'instruction' and 'question'
         # params are left as empty strings (no system prompt or query).
+        #
+        # NOTE: Only pass method-level params here. Constructor-level
+        # params (use_llmlingua2, context_budget, target_context_budget,
+        # min_compress_ratio) belong on PromptCompressor.__init__(), not
+        # on compress_prompt(). Passing them here raises TypeError in
+        # LLMLingua 0.2.x. Since we use v1 defaults (use_llmlingua2=False),
+        # the constructor defaults are correct without explicit override.
         result = compressor.compress_prompt(
             context=[text],
             instruction="",
             question="",
             rate=config["compression_rate"],
-            use_llmlingua2=config["use_llmlingua2"],
-            context_budget=config["context_budget"],
-            target_context_budget=config["target_context_budget"],
-            min_compress_ratio=config["min_compress_ratio"],
         )
         elapsed = time.time() - start_time
 
