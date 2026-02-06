@@ -141,8 +141,9 @@ def initialize_compressor(
 
     Attempts to create a PromptCompressor using the specified device.
     If the primary device fails (e.g., CUDA not available), automatically
-    falls back to CPU. Uses ``microsoft/phi-2`` as the lightweight ranker
-    model per the v0.0.3c spec.
+    falls back to CPU. Tries multiple model names in priority order:
+    NousResearch/Llama-2-7b-hf (LLMLingua default), then microsoft/phi-2
+    (lightweight alternative).
 
     Args:
         device: PyTorch device string. One of "cuda", "mps", or "cpu".
@@ -166,46 +167,62 @@ def initialize_compressor(
         logger.error("llmlingua not installed; cannot initialize compressor")
         return None
 
-    # Attempt initialization on the requested device
-    try:
-        start_time = time.time()
-        compressor = PromptCompressor(
-            model_name="microsoft/phi-2",
-            device_map=device,
-        )
-        elapsed = time.time() - start_time
-        logger.info(
-            "Compressor initialized on %s in %.2fs",
-            device, elapsed
-        )
-        return compressor
-    except Exception as exc:
-        logger.warning(
-            "Failed to initialize compressor on %s: %s: %s",
-            device, type(exc).__name__, exc
-        )
+    # Model candidates in priority order: LLMLingua default, then phi-2
+    model_candidates = [
+        "NousResearch/Llama-2-7b-hf",
+        "microsoft/phi-2",
+    ]
+
+    # Attempt initialization on the requested device with each model
+    for model_name in model_candidates:
+        try:
+            start_time = time.time()
+            logger.info(
+                "Trying model=%s on device=%s", model_name, device
+            )
+            compressor = PromptCompressor(
+                model_name=model_name,
+                device_map=device,
+            )
+            elapsed = time.time() - start_time
+            logger.info(
+                "Compressor initialized: model=%s, device=%s, time=%.2fs",
+                model_name, device, elapsed
+            )
+            return compressor
+        except Exception as exc:
+            logger.warning(
+                "Failed to initialize %s on %s: %s: %s",
+                model_name, device, type(exc).__name__, exc
+            )
 
     # Fallback to CPU if the requested device was not CPU
     if device != "cpu":
         logger.info("Falling back to CPU initialization")
-        try:
-            start_time = time.time()
-            compressor = PromptCompressor(
-                model_name="microsoft/phi-2",
-                device_map="cpu",
-            )
-            elapsed = time.time() - start_time
-            logger.info(
-                "Compressor initialized on CPU (fallback) in %.2fs", elapsed
-            )
-            return compressor
-        except Exception as exc:
-            logger.error(
-                "Failed to initialize compressor on CPU: %s: %s",
-                type(exc).__name__, exc
-            )
+        for model_name in model_candidates:
+            try:
+                start_time = time.time()
+                logger.info(
+                    "Trying model=%s on device=cpu (fallback)", model_name
+                )
+                compressor = PromptCompressor(
+                    model_name=model_name,
+                    device_map="cpu",
+                )
+                elapsed = time.time() - start_time
+                logger.info(
+                    "Compressor initialized: model=%s, device=cpu "
+                    "(fallback), time=%.2fs",
+                    model_name, elapsed
+                )
+                return compressor
+            except Exception as exc:
+                logger.error(
+                    "Failed to initialize %s on CPU: %s: %s",
+                    model_name, type(exc).__name__, exc
+                )
 
-    logger.error("Compressor initialization failed on all devices")
+    logger.error("Compressor initialization failed on all devices and models")
     return None
 
 
@@ -255,8 +272,14 @@ def compress_document(
     start_time = time.time()
 
     try:
+        # compress_prompt expects context as List[str], not a bare string.
+        # We wrap the document in a list, which LLMLingua treats as a
+        # single-context compression. The 'instruction' and 'question'
+        # params are left as empty strings (no system prompt or query).
         result = compressor.compress_prompt(
-            text,
+            context=[text],
+            instruction="",
+            question="",
             rate=config["compression_rate"],
             use_llmlingua2=config["use_llmlingua2"],
             context_budget=config["context_budget"],
@@ -266,7 +289,11 @@ def compress_document(
         elapsed = time.time() - start_time
 
         compressed_text = result.get("compressed_prompt", "")
-        compression_ratio = result.get("compression_ratio", 0.0)
+        compression_ratio = result.get("ratio", 0.0)
+        # LLMLingua returns 'ratio' as the key in newer versions,
+        # fall back to 'compression_ratio' for older versions
+        if compression_ratio == 0.0:
+            compression_ratio = result.get("compression_ratio", 0.0)
 
         logger.info(
             "Document compression complete: ratio=%.4f, time=%.2fs, "
