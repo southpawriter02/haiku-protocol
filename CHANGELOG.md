@@ -29,6 +29,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Validation rules specification (`research/validation_rules.md`) with error taxonomy (1xx-5xx codes), 3 recovery strategies (auto-correction, aggregation, interactive repair), validation pipeline diagram, and pass/fail examples for all 6 rules (v0.0.2d)
 - `ErrorSeverity` enum, `ValidationError`/`ValidationResult` dataclasses, Levenshtein-based auto-correction via `suggest_fix()`, and `VAGUE_VERIFY_TERMS` constant for non-automatable check detection (v0.0.2d)
 - Unit test suite for HaikuValidator with 75 tests covering happy path, edge cases, error paths for all 6 rules, log output verification, recovery strategies, and end-to-end use case workflow (v0.0.2d)
+- Three curated benchmark sample documents in `benchmarks/samples/` — simple.md (npm init, ~103 tokens), medium.md (git stash workflow, ~488 tokens), complex.md (Kubernetes deployment guide, ~1977 tokens) (v0.0.3a)
+- Automated complexity scoring tool (`benchmarks/complexity_scorer.py`) with `score_document_complexity()`, `classify_by_score()`, `estimate_tokens()`, and `score_all_samples()` functions (v0.0.3a)
+- Complexity scoring results (`benchmarks/complexity_scores.json`) confirming all 3 documents match expected tier classifications (v0.0.3a)
+- Curation checklist (`benchmarks/curation_checklist.json`) documenting source, domain, tier, verification status, and selection rationale for each sample document (v0.0.3a)
+- Unit test suite for complexity scorer with 30 tests covering happy path, edge cases, error paths, classification boundaries, token estimation, logging, and full curation use case workflow (v0.0.3a)
 
 ## [0.0.1] - 2026-02-06
 
