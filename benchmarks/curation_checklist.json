@@ -1,0 +1,79 @@
+{
+  "version": "v0.0.3a",
+  "generated_at": "2026-02-06T17:20:00Z",
+  "generated_by": "complexity_scorer.py",
+  "documents": [
+    {
+      "document_name": "simple.md",
+      "source_description": "npm init procedure — based on official npm documentation (npm init --help, docs.npmjs.com)",
+      "source_license": "npm CLI documentation is CC-BY-4.0; this document is an original procedural excerpt",
+      "domain": "Package Management (npm)",
+      "complexity_tier": "SIMPLE",
+      "verification": {
+        "is_procedural": true,
+        "is_publicly_available": true,
+        "is_english_only": true,
+        "has_no_formatting_artifacts": true,
+        "token_count_reasonable": true,
+        "unique_from_others": true
+      },
+      "preliminary_token_estimate": 103,
+      "character_count": 415,
+      "word_count": 62,
+      "complexity_score": 0.045,
+      "notes": "Slightly over 100-token Simple range (103 tokens). Accepted per spec rule: 'For Simple-tier: If 101-150 tokens, accept with note (minor extension).' Contains 3 sequential steps, no branching, 1 prerequisite. Clean procedural format.",
+      "decision": "PASS"
+    },
+    {
+      "document_name": "medium.md",
+      "source_description": "Git stash workflow — based on git-stash(1) man page (git stash --help, git-scm.com/docs/git-stash)",
+      "source_license": "Git documentation is GPL-2.0; this document is an original procedural excerpt",
+      "domain": "Version Control (Git)",
+      "complexity_tier": "MEDIUM",
+      "verification": {
+        "is_procedural": true,
+        "is_publicly_available": true,
+        "is_english_only": true,
+        "has_no_formatting_artifacts": true,
+        "token_count_reasonable": true,
+        "unique_from_others": true
+      },
+      "preliminary_token_estimate": 488,
+      "character_count": 1954,
+      "word_count": 325,
+      "complexity_score": 0.375,
+      "notes": "5 sequential steps with conditional branches (conflict handling, optional stash inspection). Contains 3 prerequisites, 1 warning block, 1 note block, and troubleshooting section with 3 scenarios. Scored MEDIUM (0.375) by automated complexity scorer.",
+      "decision": "PASS"
+    },
+    {
+      "document_name": "complex.md",
+      "source_description": "Kubernetes stateless application deployment — based on kubernetes.io/docs/tasks/run-application/run-stateless-application-deployment/",
+      "source_license": "Kubernetes documentation is CC-BY-4.0; this document is an original procedural guide",
+      "domain": "Container Orchestration (Kubernetes)",
+      "complexity_tier": "COMPLEX",
+      "verification": {
+        "is_procedural": true,
+        "is_publicly_available": true,
+        "is_english_only": true,
+        "has_no_formatting_artifacts": true,
+        "token_count_reasonable": true,
+        "unique_from_others": true
+      },
+      "preliminary_token_estimate": 1977,
+      "character_count": 7910,
+      "word_count": 996,
+      "complexity_score": 0.835,
+      "notes": "Full 7-step deployment tutorial with YAML manifests, multiple command blocks (24 total), 4+ warning/note blocks, conditional troubleshooting table (6 symptom-resolution pairs), cross-references to 4 external docs. Covers creation, rollout verification, service exposure, image updates, rollback, scaling, and cleanup.",
+      "decision": "PASS"
+    }
+  ],
+  "domain_diversity_check": {
+    "domains_used": [
+      "Package Management (npm)",
+      "Version Control (Git)",
+      "Container Orchestration (Kubernetes)"
+    ],
+    "all_unique": true,
+    "note": "Three distinct domains per spec diversity requirements. Domains informed by v0.0.1b industry tool analysis."
+  }
+}
