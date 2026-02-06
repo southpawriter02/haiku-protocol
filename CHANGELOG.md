@@ -21,6 +21,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Composability validation: programmatic check confirming no dead-end operators (v0.0.2b)
 - Semantic overlap check: programmatic check confirming no duplicate IDs, names, or symbols (v0.0.2b)
 - Unit test suite for operator specs with 30 tests covering happy path, composability, semantic overlap, edge cases, pattern mapping, logging, and full use case workflow (v0.0.2b)
+- Complete EBNF grammar specification (`research/haiku_grammar.bnf`) with all 12 operators, precedence table, 5 ambiguity resolution rules, and shared terminals (v0.0.2c)
+- Research-phase tokenizer and validator (`research/haiku_parser.py`) with `HaikuParser` class, `Token`/`ParseResult` dataclasses, regex-based tokenizer, and structural validation (v0.0.2c)
+- CNL Grammar Style Guide (`STYLE_GUIDE.md`) with operator quick reference, naming conventions, 8 composition rules, encoding examples, ambiguity resolution rules, and terminology (v0.0.2c)
+- Unit test suite for HaikuParser with 45 tests covering 10 valid spec strings, 5 invalid spec strings, tokenizer behavior, edge cases, ambiguity resolution, grammar completeness, logging, and use case integration (v0.0.2c)
 
 ## [0.0.1] - 2026-02-06
 
