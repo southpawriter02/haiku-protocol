@@ -1,0 +1,8 @@
+Check certificate expiry: openssl s_client -connect domain.com:443 | grep "Not After"
+If expiry is within 30 days, begin renewal.
+Request new certificate from CA (e.g., Let's Encrypt certbot certonly).
+WARN: Ensure backup of old certificate before deletion.
+Install new certificate in web server config (nginx.conf or apache2.conf).
+Verify configuration syntax: nginx -t or apachectl configtest
+Reload web server: systemctl reload nginx or systemctl reload apache2
+Test HTTPS connectivity: curl -I https://domain.com

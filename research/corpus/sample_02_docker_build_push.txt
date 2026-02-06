@@ -1,0 +1,5 @@
+Build the Docker image: docker build -t myapp:latest .
+Tag the image for registry: docker tag myapp:latest registry.io/myapp:latest
+Verify the image locally: docker run -p 8080:8080 registry.io/myapp:latest
+Push to registry: docker push registry.io/myapp:latest
+Confirm successful push by listing registry tags.

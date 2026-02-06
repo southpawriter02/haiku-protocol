@@ -1,0 +1,7 @@
+WARNING: This will delete ALL cached data. Coordinate with team beforehand.
+Connect to Redis: redis-cli -h <host> -p <port>
+Check current memory: INFO memory
+Flush all databases: FLUSHALL (irreversible) or FLUSHDB (current DB only)
+Verify flush: DBSIZE (should return 0)
+Monitor cache rebuild: MONITOR or KEYS * (check count)
+Alert team when cache is rebuilt and application performance stabilizes.

@@ -1,0 +1,7 @@
+Check for outdated packages: npm outdated
+Review breaking changes for major versions before updating.
+For patch/minor updates: npm update
+For specific package: npm update express@latest
+Run full test suite: npm test
+If tests pass, commit updated package-lock.json.
+If tests fail, revert: npm ci

@@ -1,0 +1,7 @@
+If local changes are lost, check git reflog: git reflog
+If commits are missing, browse reflog: git reflog show
+Recover lost commit: git checkout <commit-hash>
+If you need to recover deleted branch: git reflog show <branch-name>
+If merge conflicts occurred, abort: git merge --abort
+Reset to previous state: git reset --hard HEAD~1 (WARNING: irreversible)
+Verify recovery: git log --oneline

@@ -1,0 +1,8 @@
+If SSH authentication fails, diagnose as follows:
+1. Check file permissions: ls -la ~/.ssh/id_rsa should show 600
+2. Verify SSH service: systemctl status ssh
+3. Test SSH connection verbosity: ssh -vv user@host
+4. If "Permission denied (publickey)", add public key to ~/.ssh/authorized_keys on remote
+5. If still failing, check host's sshd config (PermitPublicKey must be yes)
+6. Reload SSH daemon: systemctl reload ssh
+7. Retry connection

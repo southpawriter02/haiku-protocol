@@ -1,0 +1,8 @@
+WARNING: This procedure requires a 15-minute maintenance window.
+Step 1: Back up the current database to external storage.
+Step 2: Stop all application processes and verify no active connections remain.
+Step 3: Run the migration script: ./scripts/migrate.sh --version 2.1.0
+Step 4: If migration fails, restore from backup (see Rollback Procedure).
+Step 5: Verify schema integrity: ./scripts/validate-schema.sh
+Step 6: Restart application services in the following order: API → Worker → Cache
+Step 7: Monitor error logs for 10 minutes before declaring success.

@@ -1,0 +1,5 @@
+To start the PostgreSQL server, first ensure the data directory exists and
+is owned by the postgres user. Initialize the database cluster using initdb.
+Set appropriate permissions (700) on the data directory. Then start the server
+with pg_ctl start -D /var/lib/postgresql/data. Monitor logs in
+/var/log/postgresql/ for startup errors.

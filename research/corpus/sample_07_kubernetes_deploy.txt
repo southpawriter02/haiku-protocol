@@ -1,0 +1,7 @@
+Prerequisites: kubectl configured, Docker image built and pushed to registry.
+Create a deployment manifest in deploy.yaml with: image reference, replicas (3), resource limits.
+Apply manifest: kubectl apply -f deploy.yaml
+Wait for rollout: kubectl rollout status deployment/myapp
+Verify pods running: kubectl get pods -l app=myapp
+Check logs: kubectl logs deployment/myapp
+If pods are not running, describe pod: kubectl describe pod <pod-name> to see events and errors.
