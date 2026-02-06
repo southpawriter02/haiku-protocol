@@ -10,6 +10,11 @@ project_root = Path(__file__).parent.parent
 if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 
+# Also ensure research/ is directly importable (for parser, extractor, etc.)
+research_dir = project_root / "research"
+if str(research_dir) not in sys.path:
+    sys.path.insert(0, str(research_dir))
+
 
 @pytest.fixture(scope="session")
 def corpus_dir():
@@ -47,3 +52,64 @@ def sample_mixed_text():
         "See Rollback Procedure for error recovery.\n"
         "Prerequisites: Python 3.9 and backup completed."
     )
+
+
+# ── v0.0.2c: HaikuParser Fixtures ──
+
+
+@pytest.fixture
+def parser():
+    """Fresh HaikuParser instance for each test."""
+    from haiku_parser import HaikuParser
+    return HaikuParser()
+
+
+@pytest.fixture(scope="session")
+def valid_haiku_cases():
+    """10 valid haiku strings from the v0.0.2c specification.
+
+    Each tuple is (description, haiku_string, expected_min_statements).
+    """
+    return [
+        ("Simple action",
+         "Action:Restart_Service", 1),
+        ("Action with REQUIRES",
+         "Action:Deploy REQUIRES State:Config_Valid", 1),
+        ("Action with EXEC",
+         "Action:Backup -> EXEC:backup.sh", 1),
+        ("Sequential actions",
+         "Action:Prepare; Action:Deploy; Action:Verify", 3),
+        ("Conditional branching",
+         "IF:Success THEN:Action:Continue ELSE:Action:Rollback", 3),
+        ("Verification",
+         "Action:Deploy -> EXEC:deploy.sh; VERIFY:Service_Running", 2),
+        ("Warning",
+         "Action:Delete WARN:No_Recovery -> Data_Loss", 1),
+        ("Metadata + action",
+         "META:version=1.0; Action:Execute -> EXEC:script.sh", 1),
+        ("Loop with action",
+         "LOOP:3:Action:Retry -> EXEC:attempt.sh", 2),
+        ("Complex composition",
+         "META:author=DevOps; Action:Backup REQUIRES State:Online -> EXEC:backup.sh; "
+         "IF:Success THEN:Action:Verify ELSE:Action:Alert; VERIFY:Backup_Exists", 5),
+    ]
+
+
+@pytest.fixture(scope="session")
+def invalid_haiku_cases():
+    """5 invalid haiku strings from the v0.0.2c specification.
+
+    Each tuple is (description, haiku_string, expected_error_substring).
+    """
+    return [
+        ("Missing identifier",
+         "Action:", "Unexpected"),
+        ("REQUIRES without Action",
+         "REQUIRES State:Online", "REQUIRES without preceding Action"),
+        ("THEN without IF",
+         "Action:Deploy THEN Action:Verify", "Unexpected"),
+        ("WARN without Action context",
+         "WARN:Unknown_Identifier -> Consequence", "No valid statements"),
+        ("Unbalanced brackets",
+         "Action:Deploy [broken_bracket", "Unexpected"),
+    ]
