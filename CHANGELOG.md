@@ -25,6 +25,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Research-phase tokenizer and validator (`research/haiku_parser.py`) with `HaikuParser` class, `Token`/`ParseResult` dataclasses, regex-based tokenizer, and structural validation (v0.0.2c)
 - CNL Grammar Style Guide (`STYLE_GUIDE.md`) with operator quick reference, naming conventions, 8 composition rules, encoding examples, ambiguity resolution rules, and terminology (v0.0.2c)
 - Unit test suite for HaikuParser with 45 tests covering 10 valid spec strings, 5 invalid spec strings, tokenizer behavior, edge cases, ambiguity resolution, grammar completeness, logging, and use case integration (v0.0.2c)
+- Multi-stage validation pipeline (`research/haiku_validator.py`) with `HaikuValidator` class implementing 6 rules (VAL-001 through VAL-006) across 5 sequential stages: syntactic, semantic, referential, completeness, and execution (v0.0.2d)
+- Validation rules specification (`research/validation_rules.md`) with error taxonomy (1xx-5xx codes), 3 recovery strategies (auto-correction, aggregation, interactive repair), validation pipeline diagram, and pass/fail examples for all 6 rules (v0.0.2d)
+- `ErrorSeverity` enum, `ValidationError`/`ValidationResult` dataclasses, Levenshtein-based auto-correction via `suggest_fix()`, and `VAGUE_VERIFY_TERMS` constant for non-automatable check detection (v0.0.2d)
+- Unit test suite for HaikuValidator with 75 tests covering happy path, edge cases, error paths for all 6 rules, log output verification, recovery strategies, and end-to-end use case workflow (v0.0.2d)
 
 ## [0.0.1] - 2026-02-06
 

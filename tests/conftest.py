@@ -113,3 +113,44 @@ def invalid_haiku_cases():
         ("Unbalanced brackets",
          "Action:Deploy [broken_bracket", "Unexpected"),
     ]
+
+
+# ── v0.0.2d: HaikuValidator Fixtures ──
+
+
+@pytest.fixture
+def validator():
+    """Fresh HaikuValidator instance for a simple valid haiku."""
+    from haiku_validator import HaikuValidator
+    return HaikuValidator("Action:Deploy REQUIRES State:Online")
+
+
+@pytest.fixture(scope="session")
+def valid_validation_cases():
+    """Haiku strings that should pass full validation (v0.0.2d).
+
+    Each tuple is (description, haiku_string).
+    """
+    return [
+        ("Simple action", "Action:Deploy"),
+        ("Action with REQUIRES", "Action:Deploy REQUIRES State:Online"),
+        ("Sequential actions", "Action:Prepare; Action:Deploy; Action:Verify"),
+        ("Conditional", "IF:Success THEN:Action:Continue ELSE:Action:Rollback"),
+        ("Loop", "LOOP:3:Action:Retry -> EXEC:attempt.sh"),
+        ("Metadata + action", "META:version=1.0; Action:Execute -> EXEC:script.sh"),
+        ("Action with VERIFY", "Action:Deploy; VERIFY:Service_Running"),
+        ("REF statement", "Action:Deploy; REF:Runbook_Deploy:Recovery"),
+    ]
+
+
+@pytest.fixture(scope="session")
+def invalid_validation_cases():
+    """Haiku strings that should fail validation (v0.0.2d).
+
+    Each tuple is (description, haiku_string, expected_error_code).
+    """
+    return [
+        ("Syntax error", "Action:Deploy [broken", "VAL-001"),
+        ("Self-referential", "Action:Deploy REQUIRES State:Deploy", "VAL-004"),
+        ("Empty input", "", "VAL-001"),
+    ]
