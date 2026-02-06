@@ -1,0 +1,75 @@
+{
+  "version": "0.0.3b",
+  "encoding": "cl100k_base",
+  "tokenizer": "regex_fallback",
+  "tokenizer_mode": "regex_fallback",
+  "collected_at": "2026-02-06T17:43:40.778877+00:00",
+  "documents": [
+    {
+      "tier": "Simple",
+      "file_path": "/sessions/optimistic-epic-davinci/mnt/haiku-protocol/benchmarks/samples/simple.md",
+      "metrics": {
+        "character_count": 415,
+        "word_count": 62,
+        "sentence_count": 7,
+        "token_count": 101,
+        "unique_token_count": 68,
+        "avg_tokens_per_sentence": 14.43,
+        "avg_tokens_per_word": 1.63,
+        "content_density_score": 16.29
+      },
+      "content_analysis": {
+        "number_of_procedures": 0,
+        "number_of_prerequisites": 0,
+        "number_of_commands": 9,
+        "number_of_warnings": 0,
+        "number_of_conditions": 0,
+        "number_of_cross_references": 0
+      }
+    },
+    {
+      "tier": "Medium",
+      "file_path": "/sessions/optimistic-epic-davinci/mnt/haiku-protocol/benchmarks/samples/medium.md",
+      "metrics": {
+        "character_count": 1954,
+        "word_count": 325,
+        "sentence_count": 12,
+        "token_count": 443,
+        "unique_token_count": 200,
+        "avg_tokens_per_sentence": 36.92,
+        "avg_tokens_per_word": 1.36,
+        "content_density_score": 13.63
+      },
+      "content_analysis": {
+        "number_of_procedures": 5,
+        "number_of_prerequisites": 1,
+        "number_of_commands": 32,
+        "number_of_warnings": 2,
+        "number_of_conditions": 4,
+        "number_of_cross_references": 0
+      }
+    },
+    {
+      "tier": "Complex",
+      "file_path": "/sessions/optimistic-epic-davinci/mnt/haiku-protocol/benchmarks/samples/complex.md",
+      "metrics": {
+        "character_count": 7910,
+        "word_count": 996,
+        "sentence_count": 56,
+        "token_count": 1589,
+        "unique_token_count": 511,
+        "avg_tokens_per_sentence": 28.38,
+        "avg_tokens_per_word": 1.6,
+        "content_density_score": 15.95
+      },
+      "content_analysis": {
+        "number_of_procedures": 7,
+        "number_of_prerequisites": 1,
+        "number_of_commands": 103,
+        "number_of_warnings": 4,
+        "number_of_conditions": 7,
+        "number_of_cross_references": 1
+      }
+    }
+  ]
+}
