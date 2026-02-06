@@ -1,0 +1,81 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environments
+venv/
+env/
+ENV/
+.venv/
+
+# IDE and Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Type Checking
+.mypy_cache/
+
+# Code Formatting
+.ruff_cache/
+
+# Jupyter
+.ipynb_checkpoints
+*.ipynb
+
+# Environment Variables (CRITICAL)
+.env
+.env.local
+.env.*.local
+
+# Secrets and Credentials
+*.pem
+*.key
+*.p12
+api_keys.json
+credentials.json
+secrets.yaml
+
+# Logs and Temp
+*.log
+logs/
+*.tmp
+*.temp
+*.bak
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build
+dist/
+build/
+
+# Benchmarks (generated results)
+benchmarks/results/
+
+# Design Documents (Notion export / working drafts)
+docs/design/
+CLAUDE.md
+
+# Demo and Cache
+*.pkl
+*.pickle
+*.cache
+cache/
