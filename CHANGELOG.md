@@ -16,6 +16,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Unit test suite for PatternExtractor with 30 tests covering happy path, edge cases, error paths, ambiguity resolution, and log output verification (v0.0.2a)
 - Test infrastructure: `tests/` directory with `conftest.py` shared fixtures (v0.0.2a)
 - CHANGELOG.md following Keep a Changelog convention (v0.0.2a)
+- Operator specification data model (`research/operator_specs.py`) with `OperatorSpec` TypedDict, 12 operators, 8 composition rules, naming conventions, and validation functions (v0.0.2b)
+- Complete operator reference document (`research/operator_reference.md`) with BNF syntax, before/after examples, edge cases, precedence, composition rules, naming conventions, decision tree, and 5 end-to-end encoding examples (v0.0.2b)
+- Composability validation: programmatic check confirming no dead-end operators (v0.0.2b)
+- Semantic overlap check: programmatic check confirming no duplicate IDs, names, or symbols (v0.0.2b)
+- Unit test suite for operator specs with 30 tests covering happy path, composability, semantic overlap, edge cases, pattern mapping, logging, and full use case workflow (v0.0.2b)
 
 ## [0.0.1] - 2026-02-06
 
