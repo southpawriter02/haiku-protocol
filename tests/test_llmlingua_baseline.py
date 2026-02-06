@@ -959,3 +959,114 @@ class TestConfigurationConstants:
         """SAMPLE_FILES covers Simple, Medium, Complex."""
         tiers = {tier for _, tier in SAMPLE_FILES}
         assert tiers == {"Simple", "Medium", "Complex"}
+
+
+# ═══════════════════════════════════════════════════════════════════
+# RAW METRICS TOKEN COUNT CONSISTENCY TESTS
+# ═══════════════════════════════════════════════════════════════════
+
+
+class TestRawMetricsTokenConsistency:
+    """Tests verifying raw_metrics.json token counts flow correctly."""
+
+    # Acceptance Criterion: "Compression metrics recorded: original_tokens"
+    # This ensures original_tokens from v0.0.3b are used consistently.
+
+    @pytest.mark.unit
+    def test_analyze_uses_raw_metrics_count_when_provided(self, samples_dir):
+        """analyze_llmlingua_results uses raw_metrics token count over local count."""
+        # Acceptance Criterion: "Compression metrics recorded: original_tokens"
+        file_path = samples_dir / "simple.md"
+        # Pass a known count that differs from what local counting would produce
+        result = analyze_llmlingua_results(
+            file_path, "Simple", None, "cpu", False, None,
+            raw_metrics_token_count=101,
+        )
+        assert result["metrics"]["original_tokens"] == 101
+
+    @pytest.mark.unit
+    def test_analyze_falls_back_to_local_when_none(self, samples_dir):
+        """Falls back to local counting when raw_metrics count is None."""
+        # Acceptance Criterion: "Compression metrics recorded: original_tokens"
+        file_path = samples_dir / "simple.md"
+        result = analyze_llmlingua_results(
+            file_path, "Simple", None, "cpu", False, None,
+            raw_metrics_token_count=None,
+        )
+        # Should still have a positive token count from local counting
+        assert result["metrics"]["original_tokens"] > 0
+
+    @pytest.mark.unit
+    def test_run_baseline_passes_raw_metrics_tokens(
+        self, samples_dir, raw_metrics_file, tmp_path
+    ):
+        """run_baseline reads token counts from raw_metrics.json and passes them."""
+        # Acceptance Criterion: "Compression metrics recorded: original_tokens"
+        output = tmp_path / "output.json"
+        results = run_baseline(samples_dir, raw_metrics_file, output)
+
+        # Verify token counts match what's in raw_metrics_file
+        for doc in results["documents"]:
+            tier = doc["tier"]
+            if tier == "Simple":
+                assert doc["metrics"]["original_tokens"] == 101
+            elif tier == "Medium":
+                assert doc["metrics"]["original_tokens"] == 443
+            elif tier == "Complex":
+                assert doc["metrics"]["original_tokens"] == 1589
+
+    @pytest.mark.unit
+    def test_run_baseline_handles_malformed_raw_metrics(
+        self, samples_dir, tmp_path
+    ):
+        """run_baseline handles malformed raw_metrics gracefully."""
+        # Write malformed JSON that's valid JSON but missing expected structure
+        raw_path = tmp_path / "raw_metrics.json"
+        raw_path.write_text('{"version": "0.0.3b"}')
+        output = tmp_path / "output.json"
+
+        # Should not raise; falls back to local counting
+        results = run_baseline(samples_dir, raw_path, output)
+        assert len(results["documents"]) == 3
+        # Token counts should still be positive (from local counting)
+        for doc in results["documents"]:
+            assert doc["metrics"]["original_tokens"] > 0
+
+    @pytest.mark.unit
+    def test_analyze_logs_raw_metrics_source(self, caplog, samples_dir):
+        """Logs indicate token count source as raw_metrics.json when provided."""
+        file_path = samples_dir / "simple.md"
+        with caplog.at_level(logging.INFO):
+            analyze_llmlingua_results(
+                file_path, "Simple", None, "cpu", False, None,
+                raw_metrics_token_count=101,
+            )
+        assert "from raw_metrics.json" in caplog.text
+
+    @pytest.mark.unit
+    def test_analyze_logs_local_count_source(self, caplog, samples_dir):
+        """Logs indicate token count source as local when no raw_metrics provided."""
+        file_path = samples_dir / "simple.md"
+        with caplog.at_level(logging.INFO):
+            analyze_llmlingua_results(
+                file_path, "Simple", None, "cpu", False, None,
+                raw_metrics_token_count=None,
+            )
+        assert "locally counted" in caplog.text
+
+    @pytest.mark.unit
+    def test_compressed_tokens_still_locally_counted(
+        self, samples_dir, mock_compressor
+    ):
+        """Compressed tokens are always locally counted (not from raw_metrics)."""
+        # Acceptance Criterion: "Compression metrics recorded: compressed_tokens"
+        file_path = samples_dir / "simple.md"
+        result = analyze_llmlingua_results(
+            file_path, "Simple", mock_compressor, "cpu", False, None,
+            raw_metrics_token_count=101,
+        )
+        # original should be from raw_metrics, compressed from local count
+        assert result["metrics"]["original_tokens"] == 101
+        assert result["metrics"]["compressed_tokens"] > 0
+        # compressed_tokens should differ from original (it's the mock output)
+        assert result["metrics"]["compressed_tokens"] != 101

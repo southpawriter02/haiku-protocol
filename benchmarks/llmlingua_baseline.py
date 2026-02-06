@@ -519,11 +519,13 @@ def analyze_llmlingua_results(
     device: str,
     has_gpu: bool,
     gpu_name: Optional[str],
+    raw_metrics_token_count: Optional[int] = None,
 ) -> Dict[str, Any]:
     """
     Read a sample document and run the full compression pipeline.
 
-    Reads the document from disk, counts original tokens, runs
+    Reads the document from disk, uses the authoritative token count
+    from raw_metrics.json (v0.0.3b output) for original_tokens, runs
     LLMLingua compression (or estimation if compressor is None),
     counts compressed tokens, and assembles the result dictionary.
     The compressor is initialized once in ``run_baseline()`` and
@@ -537,6 +539,10 @@ def analyze_llmlingua_results(
         device: PyTorch device string used
         has_gpu: Whether GPU was detected
         gpu_name: Human-readable GPU identifier (or None)
+        raw_metrics_token_count: Authoritative token count from
+            raw_metrics.json (v0.0.3b). If provided, used as
+            original_tokens for consistency with upstream metrics.
+            If None, falls back to local re-counting.
 
     Returns:
         Document result dict (from ``build_document_result``) on success,
@@ -555,12 +561,22 @@ def analyze_llmlingua_results(
             "error": "Failed to read document: %s" % str(exc),
         }
 
-    # ── Count Original Tokens ──
-    original_tokens = count_compressed_tokens(text)
-    logger.info(
-        "Original token count for %s: %d tokens",
-        tier, original_tokens
-    )
+    # ── Determine Original Token Count ──
+    # Prefer the authoritative count from raw_metrics.json (v0.0.3b)
+    # to ensure consistency across the v0.0.3x pipeline. Only fall
+    # back to local re-counting if the upstream value is unavailable.
+    if raw_metrics_token_count is not None:
+        original_tokens = raw_metrics_token_count
+        logger.info(
+            "Original token count for %s: %d tokens (from raw_metrics.json)",
+            tier, original_tokens
+        )
+    else:
+        original_tokens = count_compressed_tokens(text)
+        logger.info(
+            "Original token count for %s: %d tokens (locally counted)",
+            tier, original_tokens
+        )
 
     # ── Compress or Estimate ──
     if compressor is not None:
@@ -685,12 +701,13 @@ def run_baseline(
 
     This is the primary workflow function. It:
     1. Verifies prerequisites (raw_metrics.json and samples directory)
-    2. Detects GPU availability
-    3. Initializes the LLMLingua compressor (or prepares fallback)
-    4. Records the LLMLingua library version
-    5. Processes each sample document
-    6. Builds the comparison table
-    7. Writes results to the output JSON file
+    2. Loads authoritative token counts from raw_metrics.json (v0.0.3b)
+    3. Detects GPU availability
+    4. Initializes the LLMLingua compressor (or prepares fallback)
+    5. Records the LLMLingua library version
+    6. Processes each sample document (passing upstream token counts)
+    7. Builds the comparison table
+    8. Writes results to the output JSON file
 
     Args:
         samples_dir: Path to ``benchmarks/samples/`` directory
@@ -721,6 +738,30 @@ def run_baseline(
         )
 
     logger.info("Prerequisites verified: raw_metrics and samples exist")
+
+    # ── Load Raw Metrics Token Counts ──
+    # Read the authoritative token counts from v0.0.3b's output so
+    # original_tokens in this pipeline match the upstream measurements
+    # exactly, regardless of which tokenizer fallback is available.
+    raw_metrics_tokens: Dict[str, int] = {}
+    try:
+        with open(raw_metrics_path, "r", encoding="utf-8") as f:
+            raw_data = json.load(f)
+        for doc_entry in raw_data.get("documents", []):
+            tier_name = doc_entry.get("tier")
+            token_count = doc_entry.get("metrics", {}).get("token_count")
+            if tier_name and token_count is not None:
+                raw_metrics_tokens[tier_name] = token_count
+        logger.info(
+            "Loaded raw_metrics token counts: %s",
+            {k: v for k, v in raw_metrics_tokens.items()}
+        )
+    except (json.JSONDecodeError, KeyError) as exc:
+        logger.warning(
+            "Could not parse raw_metrics.json token counts: %s "
+            "(will fall back to local counting)",
+            exc
+        )
 
     # ── Detect GPU ──
     has_gpu, gpu_name = detect_gpu_availability()
@@ -776,7 +817,8 @@ def run_baseline(
             continue
 
         doc_result = analyze_llmlingua_results(
-            file_path, tier, compressor, device, has_gpu, gpu_name
+            file_path, tier, compressor, device, has_gpu, gpu_name,
+            raw_metrics_token_count=raw_metrics_tokens.get(tier),
         )
         results["documents"].append(doc_result)
 

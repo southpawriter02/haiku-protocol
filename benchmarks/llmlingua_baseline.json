@@ -1,7 +1,7 @@
 {
   "version": "0.0.3c",
-  "llmlingua_version": "0.2.2",
-  "executed_at": "2026-02-06T20:18:08.557015+00:00",
+  "llmlingua_version": "not_installed",
+  "executed_at": "2026-02-06T23:00:49.961425+00:00",
   "configuration": {
     "compression_rate": 0.5,
     "target_token": null,
@@ -11,81 +11,81 @@
     "min_compress_ratio": 0.5
   },
   "hardware": {
-    "device_used": "mps",
-    "gpu_available": true,
-    "gpu_name": "Apple Metal Performance Shaders"
+    "device_used": "cpu",
+    "gpu_available": false,
+    "gpu_name": null
   },
   "documents": [
     {
       "tier": "Simple",
-      "file_path": "/Users/turtle1/Documents/GitHub/haiku-protocol/benchmarks/samples/simple.md",
-      "device_used": "mps",
-      "gpu_available": true,
-      "gpu_name": "Apple Metal Performance Shaders",
+      "file_path": "benchmarks/samples/simple.md",
+      "device_used": "cpu",
+      "gpu_available": false,
+      "gpu_name": null,
       "metrics": {
-        "original_tokens": 107,
-        "compressed_tokens": 55,
+        "original_tokens": 101,
+        "compressed_tokens": 52,
         "compression_ratio": 0.52,
         "execution_time_seconds": 0
       },
       "compressed_text_preview": "(estimated \u2014 no compressed text available)",
-      "semantic_preservation_notes": "LLMLingua not executed (GPU unavailable or library missing). Compression ratio is estimated based on token density.",
+      "semantic_preservation_notes": "LLMLingua not executed (GPU unavailable or library missing). Compression ratio is estimated based on token density. Error: compressor is None (initialization failed)",
       "cpu_only_estimated": true
     },
     {
       "tier": "Medium",
-      "file_path": "/Users/turtle1/Documents/GitHub/haiku-protocol/benchmarks/samples/medium.md",
-      "device_used": "mps",
-      "gpu_available": true,
-      "gpu_name": "Apple Metal Performance Shaders",
+      "file_path": "benchmarks/samples/medium.md",
+      "device_used": "cpu",
+      "gpu_available": false,
+      "gpu_name": null,
       "metrics": {
-        "original_tokens": 478,
-        "compressed_tokens": 229,
+        "original_tokens": 443,
+        "compressed_tokens": 212,
         "compression_ratio": 0.48,
         "execution_time_seconds": 0
       },
       "compressed_text_preview": "(estimated \u2014 no compressed text available)",
-      "semantic_preservation_notes": "LLMLingua not executed (GPU unavailable or library missing). Compression ratio is estimated based on token density.",
+      "semantic_preservation_notes": "LLMLingua not executed (GPU unavailable or library missing). Compression ratio is estimated based on token density. Error: compressor is None (initialization failed)",
       "cpu_only_estimated": true
     },
     {
       "tier": "Complex",
-      "file_path": "/Users/turtle1/Documents/GitHub/haiku-protocol/benchmarks/samples/complex.md",
-      "device_used": "mps",
-      "gpu_available": true,
-      "gpu_name": "Apple Metal Performance Shaders",
+      "file_path": "benchmarks/samples/complex.md",
+      "device_used": "cpu",
+      "gpu_available": false,
+      "gpu_name": null,
       "metrics": {
-        "original_tokens": 1756,
-        "compressed_tokens": 807,
+        "original_tokens": 1589,
+        "compressed_tokens": 730,
         "compression_ratio": 0.46,
         "execution_time_seconds": 0
       },
       "compressed_text_preview": "(estimated \u2014 no compressed text available)",
-      "semantic_preservation_notes": "LLMLingua not executed (GPU unavailable or library missing). Compression ratio is estimated based on token density.",
+      "semantic_preservation_notes": "LLMLingua not executed (GPU unavailable or library missing). Compression ratio is estimated based on token density. Error: compressor is None (initialization failed)",
       "cpu_only_estimated": true
     }
   ],
   "comparison_table": [
     {
       "tier": "Simple",
-      "original_tokens": 107,
-      "compressed_tokens": 55,
+      "original_tokens": 101,
+      "compressed_tokens": 52,
       "llmlingua_ratio": 0.52,
       "target_haiku_ratio": "35-40%",
       "estimated": true
     },
     {
       "tier": "Medium",
-      "original_tokens": 478,
-      "compressed_tokens": 229,
+      "original_tokens": 443,
+      "compressed_tokens": 212,
       "llmlingua_ratio": 0.48,
       "target_haiku_ratio": "40-50%",
       "estimated": true
     },
     {
       "tier": "Complex",
-      "original_tokens": 1756,
-      "compressed_tokens": 807,
+      "original_tokens": 1589,
+      "compressed_tokens": 730,
       "llmlingua_ratio": 0.46,
       "target_haiku_ratio": "45-55%",
       "estimated": true
