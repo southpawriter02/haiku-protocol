@@ -3,7 +3,7 @@
   "encoding": "cl100k_base",
   "tokenizer": "regex_fallback",
   "tokenizer_mode": "regex_fallback",
-  "collected_at": "2026-02-06T17:43:40.778877+00:00",
+  "collected_at": "2026-02-06T17:46:23.450762+00:00",
   "documents": [
     {
       "tier": "Simple",
