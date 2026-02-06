@@ -1,0 +1,187 @@
+(* ================================================================
+   HAIKU PROTOCOL GRAMMAR v0.0.2c
+   Extended Backus-Naur Form (EBNF) Specification
+   Complete specification with all 12 operators from v0.0.2b
+
+   Notation:
+     ::=     Production rule
+     |       Alternation (choice)
+     *       Zero or more repetitions
+     +       One or more repetitions
+     ?       Optional (zero or one)
+     ''      Literal string
+     []      Character class
+     ()      Grouping
+     (* *)   Comment
+
+   Case Sensitivity:
+     Operator keywords are case-sensitive.
+     Identifiers are case-sensitive.
+     Commands are case-sensitive (passed to shell).
+
+   Precedence (High to Low):
+     1. EXEC:        Command binding (tightest)
+     2. SEQ: (;)     Sequential composition
+     3. LOOP:        Iteration wrapper
+     4. IF/THEN:     Conditional branching
+     5. Action:      Procedural step
+     6. REQUIRES:    Dependency declaration
+     7. VERIFY:      Verification
+     8. WARN:        Warning declaration
+     9. REF:         Reference
+    10. META:        Metadata (declaration)
+    11. NOTE:        Note (loosest)
+   ================================================================ *)
+
+
+(* ==== ENTRY POINT ==== *)
+
+<haiku>             ::= <metadata_block>? <statement_block>
+
+<metadata_block>    ::= (<meta_statement> ';')+
+
+<statement_block>   ::= <statement> (';' <statement>)*
+
+
+(* ==== STATEMENTS (Top-level constructs) ==== *)
+
+<statement>         ::= <action_stmt>
+                      | <condition_stmt>
+                      | <loop_stmt>
+                      | <verify_stmt>
+                      | <reference_stmt>
+                      | <note_stmt>
+
+
+(* ==== OP-001: ACTION STATEMENTS ==== *)
+
+<action_stmt>       ::= <action> <action_modifier>*
+
+<action>            ::= 'Action:' <identifier>
+                      | 'A:' <identifier>
+
+<action_modifier>   ::= <requires_clause>
+                      | <exec_clause>
+                      | <verify_clause>
+                      | <warn_clause>
+
+
+(* ==== OP-002: STATE ==== *)
+
+<state>             ::= 'State:' <identifier>
+                      | 'S:' <identifier>
+
+
+(* ==== OP-003: REQUIRES (Dependency Declaration) ==== *)
+
+<requires_clause>   ::= 'REQUIRES' <state_list>
+
+<state_list>        ::= <state> (',' <state>)*
+
+
+(* ==== OP-004: EXEC (Command Execution) ==== *)
+
+<exec_clause>       ::= '->' 'EXEC:' <command>
+                      | '->' <command>
+
+<command>           ::= [^\s;]+ (' ' [^\s;]+)*
+
+
+(* ==== OP-005: IF / THEN / ELSE (Conditional Branching) ==== *)
+
+<condition_stmt>    ::= <if_clause> <then_clause> <else_clause>?
+
+<if_clause>         ::= 'IF:' <identifier>
+
+<then_clause>       ::= 'THEN:' <statement_list>
+
+<else_clause>       ::= 'ELSE:' <statement_list>
+
+<statement_list>    ::= <statement> (',' <statement>)*
+
+
+(* ==== OP-006: WARN (Warning / Consequence Declaration) ==== *)
+
+<warn_clause>       ::= 'WARN:' <identifier> '->' <identifier>
+
+
+(* ==== OP-007: VERIFY (Verification / Validation) ==== *)
+
+<verify_stmt>       ::= 'VERIFY:' <identifier>
+
+<verify_clause>     ::= 'VERIFY:' <identifier>
+
+
+(* ==== OP-008: SEQ (Sequential Ordering) ==== *)
+(* SEQ is implicit: the ';' separator in <statement_block> *)
+(* Explicit form uses SEQ: prefix for documentary emphasis *)
+
+
+(* ==== OP-009: REF (Cross-Reference) ==== *)
+
+<reference_stmt>    ::= 'REF:' <reference_id>
+
+<reference_id>      ::= <identifier> (':' <identifier>)*
+
+
+(* ==== OP-010: META (Metadata Annotation) ==== *)
+
+<meta_statement>    ::= 'META:' <meta_key> '=' <meta_value>
+
+<meta_key>          ::= [A-Za-z_][A-Za-z0-9_]*
+
+<meta_value>        ::= [^;]+
+
+
+(* ==== OP-011: LOOP (Repetition / Iteration) ==== *)
+
+<loop_stmt>         ::= 'LOOP:' <loop_spec> ':' <statement>
+
+<loop_spec>         ::= <loop_count>
+                      | 'WHILE:' <identifier>
+
+<loop_count>        ::= <digit>+
+                      | '*'
+
+
+(* ==== OP-012: NOTE (Non-Critical Information) ==== *)
+
+<note_stmt>         ::= 'NOTE:' <text>
+
+<text>              ::= [^;]+
+
+
+(* ==== SHARED TERMINALS ==== *)
+
+<identifier>        ::= [A-Za-z_][A-Za-z0-9_]*
+
+<digit>             ::= '0' | '1' | '2' | '3' | '4' | '5'
+                      | '6' | '7' | '8' | '9'
+
+
+(* ==== WHITESPACE ==== *)
+(* Whitespace (space, tab) is implicitly allowed between tokens. *)
+(* Newlines are treated as whitespace in multi-line haikus. *)
+
+
+(* ==== AMBIGUITY RESOLUTION RULES ==== *)
+
+(* RULE 1: Operator Precedence
+   When parsing encounters overlapping operators, apply the
+   precedence table above. EXEC binds tightest, NOTE loosest. *)
+
+(* RULE 2: Greedy Command Matching
+   EXEC: consumes all characters until the next recognized
+   operator keyword or semicolon. *)
+
+(* RULE 3: State List Conjunction (AND Semantics)
+   Multiple states in REQUIRES are implicitly ANDed:
+   REQUIRES State:A, State:B means A AND B. *)
+
+(* RULE 4: THEN/ELSE Sequential Semantics
+   Multiple items in THEN/ELSE clauses execute sequentially,
+   not as alternatives. *)
+
+(* RULE 5: Semicolon as Primary Separator
+   Semicolon terminates a statement. Comma is used only within
+   clauses (state lists, action lists in THEN/ELSE). *)
