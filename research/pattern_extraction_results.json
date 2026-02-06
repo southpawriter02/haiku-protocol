@@ -1,0 +1,104 @@
+{
+  "frequencies": {
+    "Actions": "60.0%",
+    "Verifications": "24.8%",
+    "Dependencies": "14.3%",
+    "Conditions": "13.3%",
+    "States": "12.4%",
+    "Warnings": "6.7%",
+    "Metadata": "4.8%",
+    "References": "3.8%"
+  },
+  "raw_counts": {
+    "Actions": 63,
+    "Verifications": 26,
+    "Dependencies": 15,
+    "Conditions": 14,
+    "States": 13,
+    "Warnings": 7,
+    "Metadata": 5,
+    "References": 4
+  },
+  "primary_counts": {
+    "Verifications": 26,
+    "Actions": 21,
+    "Conditions": 12,
+    "Warnings": 7,
+    "Dependencies": 7,
+    "States": 3,
+    "Metadata": 2
+  },
+  "examples": {
+    "Actions": [
+      "To start the PostgreSQL server, first ensure the data directory exists and",
+      "Initialize the database cluster using initdb",
+      "Set appropriate permissions (700) on the data directory",
+      "Then start the server",
+      "with pg_ctl start -D /var/lib/postgresql/data"
+    ],
+    "States": [
+      "To start the PostgreSQL server, first ensure the data directory exists and",
+      "is owned by the postgres user",
+      "Enable versioning: aws s3api put-bucket-versioning --bucket mybucket --versioning-configuration Status=Enabled",
+      "Step 2: Stop all application processes and verify no active connections remain",
+      "9+ and pip installed"
+    ],
+    "Dependencies": [
+      "To start the PostgreSQL server, first ensure the data directory exists and",
+      "Then start the server",
+      "WARNING: This procedure requires a 15-minute maintenance window",
+      "Step 1: Back up the current database to external storage",
+      "Step 2: Stop all application processes and verify no active connections remain"
+    ],
+    "Verifications": [
+      "To start the PostgreSQL server, first ensure the data directory exists and",
+      "Verify the image locally: docker run -p 8080:8080 registry",
+      "Confirm successful push by listing registry tags",
+      "Verify configuration: aws s3api get-bucket-versioning --bucket mybucket",
+      "Step 2: Stop all application processes and verify no active connections remain"
+    ],
+    "Conditions": [
+      "Then start the server",
+      "Step 4: If migration fails, restore from backup (see Rollback Procedure)",
+      "If SSH authentication fails, diagnose as follows:",
+      "If \"Permission denied (publickey)\", add public key to ~/",
+      "If still failing, check host's sshd config (PermitPublicKey must be yes)"
+    ],
+    "Warnings": [
+      "WARNING: This procedure requires a 15-minute maintenance window",
+      "Review breaking changes for major versions before updating",
+      "WARN: Ensure backup of old certificate before deletion",
+      "WARNING: This will delete ALL cached data",
+      "Coordinate with team beforehand"
+    ],
+    "References": [
+      "WARNING: This procedure requires a 15-minute maintenance window",
+      "Step 4: If migration fails, restore from backup (see Rollback Procedure)",
+      "If pods are not running, describe pod: kubectl describe pod <pod-name> to see events and errors",
+      "Review breaking changes for major versions before updating"
+    ],
+    "Metadata": [
+      "sh --version 2",
+      "Prerequisites: Python 3",
+      "Install dependencies: pip install -r requirements",
+      "Prerequisites: kubectl configured, Docker image built and pushed to registry",
+      "If tests pass, commit updated package-lock"
+    ]
+  },
+  "total_sentences_analyzed": 105,
+  "multi_match_percentage": "45.7%",
+  "documents_analyzed": 11,
+  "document_list": [
+    "sample_01_postgresql_startup.txt",
+    "sample_02_docker_build_push.txt",
+    "sample_03_aws_s3_config.txt",
+    "sample_04_db_migration_runbook.txt",
+    "sample_05_python_venv_setup.txt",
+    "sample_06_ssh_key_auth.txt",
+    "sample_07_kubernetes_deploy.txt",
+    "sample_08_nodejs_dep_update.txt",
+    "sample_09_ssl_cert_renewal.txt",
+    "sample_10_redis_cache_flush.txt",
+    "sample_11_git_repo_recovery.txt"
+  ]
+}
