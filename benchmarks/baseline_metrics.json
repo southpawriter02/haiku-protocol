@@ -1,0 +1,124 @@
+{
+  "version": "0.0.3d",
+  "timestamp": "2026-02-06T23:20:16.695868+00:00",
+  "description": "Consolidated baseline metrics: raw token counts + LLMLingua compression results + Haiku Protocol targets",
+  "encoding": "cl100k_base",
+  "tokenizer": "regex_fallback",
+  "raw_metrics_source": "v0.0.3b",
+  "llmlingua_metrics_source": "v0.0.3c",
+  "llmlingua_configuration": {
+    "compression_rate": 0.5,
+    "target_token": null,
+    "use_llmlingua2": false,
+    "context_budget": -1,
+    "target_context_budget": null,
+    "min_compress_ratio": 0.5
+  },
+  "documents": [
+    {
+      "tier": "Simple",
+      "source_file": "/sessions/optimistic-epic-davinci/mnt/haiku-protocol/benchmarks/samples/simple.md",
+      "raw_metrics": {
+        "character_count": 415,
+        "word_count": 62,
+        "sentence_count": 7,
+        "token_count": 101,
+        "unique_token_count": 68,
+        "avg_tokens_per_sentence": 14.43,
+        "avg_tokens_per_word": 1.63,
+        "content_density_score": 16.29
+      },
+      "content_analysis": {
+        "number_of_procedures": 0,
+        "number_of_prerequisites": 0,
+        "number_of_commands": 9,
+        "number_of_warnings": 0,
+        "number_of_conditions": 0,
+        "number_of_cross_references": 0
+      },
+      "llmlingua_baseline": {
+        "compression_ratio": 0.52,
+        "original_tokens": 101,
+        "compressed_tokens": 52,
+        "execution_time_seconds": 0
+      },
+      "haiku_protocol_targets": {
+        "target_compression_ratio_min": 0.3,
+        "target_compression_ratio_max": 0.4,
+        "target_description": "30\u201340% of original tokens",
+        "improvement_vs_llmlingua_percent": 22.0
+      },
+      "analysis_notes": "LLMLingua achieves 52.0% compression. Haiku Protocol should target 30\u201340% of original tokens. Potential improvement: 22.0% reduction."
+    },
+    {
+      "tier": "Medium",
+      "source_file": "/sessions/optimistic-epic-davinci/mnt/haiku-protocol/benchmarks/samples/medium.md",
+      "raw_metrics": {
+        "character_count": 1954,
+        "word_count": 325,
+        "sentence_count": 12,
+        "token_count": 443,
+        "unique_token_count": 200,
+        "avg_tokens_per_sentence": 36.92,
+        "avg_tokens_per_word": 1.36,
+        "content_density_score": 13.63
+      },
+      "content_analysis": {
+        "number_of_procedures": 5,
+        "number_of_prerequisites": 1,
+        "number_of_commands": 32,
+        "number_of_warnings": 2,
+        "number_of_conditions": 4,
+        "number_of_cross_references": 0
+      },
+      "llmlingua_baseline": {
+        "compression_ratio": 0.48,
+        "original_tokens": 443,
+        "compressed_tokens": 212,
+        "execution_time_seconds": 0
+      },
+      "haiku_protocol_targets": {
+        "target_compression_ratio_min": 0.4,
+        "target_compression_ratio_max": 0.5,
+        "target_description": "40\u201350% of original tokens",
+        "improvement_vs_llmlingua_percent": 8.0
+      },
+      "analysis_notes": "LLMLingua achieves 48.0% compression. Haiku Protocol should target 40\u201350% of original tokens. Potential improvement: 8.0% reduction."
+    },
+    {
+      "tier": "Complex",
+      "source_file": "/sessions/optimistic-epic-davinci/mnt/haiku-protocol/benchmarks/samples/complex.md",
+      "raw_metrics": {
+        "character_count": 7910,
+        "word_count": 996,
+        "sentence_count": 56,
+        "token_count": 1589,
+        "unique_token_count": 511,
+        "avg_tokens_per_sentence": 28.38,
+        "avg_tokens_per_word": 1.6,
+        "content_density_score": 15.95
+      },
+      "content_analysis": {
+        "number_of_procedures": 7,
+        "number_of_prerequisites": 1,
+        "number_of_commands": 103,
+        "number_of_warnings": 4,
+        "number_of_conditions": 7,
+        "number_of_cross_references": 1
+      },
+      "llmlingua_baseline": {
+        "compression_ratio": 0.46,
+        "original_tokens": 1589,
+        "compressed_tokens": 730,
+        "execution_time_seconds": 0
+      },
+      "haiku_protocol_targets": {
+        "target_compression_ratio_min": 0.45,
+        "target_compression_ratio_max": 0.55,
+        "target_description": "45\u201355% of original tokens",
+        "improvement_vs_llmlingua_percent": 1.0
+      },
+      "analysis_notes": "LLMLingua achieves 46.0% compression. Haiku Protocol should target 45\u201355% of original tokens. Potential improvement: 1.0% reduction."
+    }
+  ]
+}
