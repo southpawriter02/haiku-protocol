@@ -319,13 +319,14 @@ def compress_document(
 
     except Exception as exc:
         elapsed = time.time() - start_time
+        error_detail = "%s: %s" % (type(exc).__name__, exc)
         logger.error(
-            "Document compression failed after %.2fs: %s: %s",
-            elapsed, type(exc).__name__, exc
+            "Document compression failed after %.2fs: %s",
+            elapsed, error_detail
         )
         return {
             "success": False,
-            "error": str(exc),
+            "error": error_detail,
             "execution_time_seconds": round(elapsed, 2),
         }
 
@@ -592,21 +593,34 @@ def analyze_llmlingua_results(
                 metrics, preview, notes
             )
         else:
-            # Compression failed; fall through to estimation
+            # Compression failed; fall through to estimation.
+            # Surface the error in both log and JSON output so the
+            # caller can diagnose without needing terminal access.
+            compression_error = compression_result.get("error", "unknown error")
             logger.warning(
                 "Compression failed for %s: %s — using estimation fallback",
-                tier, compression_result.get("error", "unknown error")
+                tier, compression_error
             )
+
+    else:
+        compression_error = "compressor is None (initialization failed)"
+        logger.warning("No compressor available for %s", tier)
 
     # ── Fallback Estimation ──
     logger.info("Using estimation fallback for %s", tier)
     estimated = estimate_compression_result(tier, original_tokens)
 
+    # Include the compression error reason in the notes so it's
+    # visible in the JSON output (not just in terminal logs).
+    fallback_notes = estimated["semantic_preservation_notes"]
+    if compression_error:
+        fallback_notes += " Error: %s" % compression_error
+
     return build_document_result(
         tier, file_path, device, has_gpu, gpu_name,
         estimated,
         "(estimated — no compressed text available)",
-        estimated["semantic_preservation_notes"],
+        fallback_notes,
     )
 
 
