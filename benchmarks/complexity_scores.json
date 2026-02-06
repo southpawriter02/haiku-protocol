@@ -1,0 +1,56 @@
+[
+  {
+    "document": "complex",
+    "file": "complex.md",
+    "character_count": 7910,
+    "word_count": 996,
+    "token_estimate": 1977,
+    "complexity_score": 0.835,
+    "tier_classification": "COMPLEX",
+    "indicators": {
+      "step_markers": 7,
+      "command_blocks": 24,
+      "warnings": 4,
+      "conditionals": 7,
+      "prerequisites": 0,
+      "cross_references": 9
+    },
+    "scored_at": "2026-02-06T17:20:45.268776+00:00"
+  },
+  {
+    "document": "medium",
+    "file": "medium.md",
+    "character_count": 1954,
+    "word_count": 325,
+    "token_estimate": 488,
+    "complexity_score": 0.375,
+    "tier_classification": "MEDIUM",
+    "indicators": {
+      "step_markers": 5,
+      "command_blocks": 9,
+      "warnings": 2,
+      "conditionals": 4,
+      "prerequisites": 1,
+      "cross_references": 1
+    },
+    "scored_at": "2026-02-06T17:20:45.269578+00:00"
+  },
+  {
+    "document": "simple",
+    "file": "simple.md",
+    "character_count": 415,
+    "word_count": 62,
+    "token_estimate": 103,
+    "complexity_score": 0.045,
+    "tier_classification": "SIMPLE",
+    "indicators": {
+      "step_markers": 0,
+      "command_blocks": 3,
+      "warnings": 0,
+      "conditionals": 0,
+      "prerequisites": 0,
+      "cross_references": 0
+    },
+    "scored_at": "2026-02-06T17:20:45.270072+00:00"
+  }
+]
