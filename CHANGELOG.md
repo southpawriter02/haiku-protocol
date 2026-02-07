@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 - Python 3.11 virtual environment (`.venv/`) with pip 26.0.1 — recreated from broken Python 3.14-based venv inherited from prior machine (v0.1.1a)
 - Environment verification test suite (`tests/test_environment.py`) with 10 tests covering Python version, venv activation, pip availability, executable path, edge cases, and log output (v0.1.1a)
+- LLM orchestration libraries: `langchain` 1.2.9, `langchain-openai` 1.1.7, `tiktoken` 0.12.0 — core dependencies for the encoder pipeline (v0.1.1b)
+- LLM library verification test suite (`tests/test_llm_libraries.py`) with 13 tests covering version checks, PromptTemplate functionality, tiktoken tokenization/roundtrip, edge cases (empty/unicode/special chars), and log output (v0.1.1b)
 - Pytest marker registration (`pytest.ini`) with `unit`, `integration`, and `api` markers — eliminates 67+ `PytestUnknownMarkWarning` warnings across the test suite (v0.0.3c)
 - Raw metrics token consistency tests (`TestRawMetricsTokenConsistency`) with 7 new tests verifying raw_metrics.json token counts flow correctly through `analyze_llmlingua_results()` and `run_baseline()`, including malformed-input graceful degradation, logging source attribution, and compressed-token independence (v0.0.3c)
 
