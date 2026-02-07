@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Python 3.11 virtual environment (`.venv/`) with pip 26.0.1 — recreated from broken Python 3.14-based venv inherited from prior machine (v0.1.1a)
+- Environment verification test suite (`tests/test_environment.py`) with 10 tests covering Python version, venv activation, pip availability, executable path, edge cases, and log output (v0.1.1a)
 - Pytest marker registration (`pytest.ini`) with `unit`, `integration`, and `api` markers — eliminates 67+ `PytestUnknownMarkWarning` warnings across the test suite (v0.0.3c)
 - Raw metrics token consistency tests (`TestRawMetricsTokenConsistency`) with 7 new tests verifying raw_metrics.json token counts flow correctly through `analyze_llmlingua_results()` and `run_baseline()`, including malformed-input graceful degradation, logging source attribution, and compressed-token independence (v0.0.3c)
 
