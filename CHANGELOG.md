@@ -19,6 +19,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Environment files `.env` (with 0o600 permissions) and `.env.example` (template with placeholder values) for API key management (v0.1.2a)
 - `EnvValidator` class (`src/validate_env.py`) for programmatic validation of environment files — checks naming conventions, required variables, API key format, and file permissions (v0.1.2a)
 - Environment file verification test suite (`tests/test_env_validator.py`) with 28 tests covering file existence, permissions, naming conventions, validator functionality, edge cases, and log output (v0.1.2a)
+- Updated `.gitignore` with additional secret patterns (`*.secret`, `.secrets`, `.aws/`, `.gcloud/`) and version tag `(v0.1.2b)` (v0.1.2b)
+- Pre-commit hook (`.git/hooks/pre-commit`) for secret detection — scans staged files for `sk-proj-`, `sk-[a-zA-Z0-9]{20,}`, and `OPENAI_API_KEY=sk-` patterns (v0.1.2b)
+- `GitSecurityAuditor` class (`src/git_security_audit.py`) for programmatic verification of git security — 5 checks covering .gitignore, tracking status, .env.example, git history, and pre-commit hook (v0.1.2b)
+- Git security verification test suite (`tests/test_git_security.py`) with 25 tests covering .gitignore patterns, git tracking, history audit, pre-commit hook, auditor functionality, edge cases, and end-to-end workflow (v0.1.2b)
 - Pytest marker registration (`pytest.ini`) with `unit`, `integration`, and `api` markers — eliminates 67+ `PytestUnknownMarkWarning` warnings across the test suite (v0.0.3c)
 - Raw metrics token consistency tests (`TestRawMetricsTokenConsistency`) with 7 new tests verifying raw_metrics.json token counts flow correctly through `analyze_llmlingua_results()` and `run_baseline()`, including malformed-input graceful degradation, logging source attribution, and compressed-token independence (v0.0.3c)
 

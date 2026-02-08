@@ -44,13 +44,19 @@ htmlcov/
 .env.local
 .env.*.local
 
-# Secrets and Credentials
+# Secrets and Credentials (v0.1.2b)
 *.pem
 *.key
 *.p12
+*.secret
+.secrets
 api_keys.json
 credentials.json
 secrets.yaml
+
+# Cloud Credentials
+.aws/
+.gcloud/
 
 # Logs and Temp
 *.log
@@ -71,8 +77,8 @@ build/
 benchmarks/results/
 
 # Design Documents (Notion export / working drafts)
-#docs/design/
-#CLAUDE.md
+docs/design/
+CLAUDE.md
 
 # Demo and Cache
 *.pkl
