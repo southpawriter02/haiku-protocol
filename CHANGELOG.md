@@ -26,6 +26,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Pre-commit hook (`.git/hooks/pre-commit`) for secret detection — scans staged files for `sk-proj-`, `sk-[a-zA-Z0-9]{20,}`, and `OPENAI_API_KEY=sk-` patterns (v0.1.2b)
 - `GitSecurityAuditor` class (`src/git_security_audit.py`) for programmatic verification of git security — 5 checks covering .gitignore, tracking status, .env.example, git history, and pre-commit hook (v0.1.2b)
 - Git security verification test suite (`tests/test_git_security.py`) with 25 tests covering .gitignore patterns, git tracking, history audit, pre-commit hook, auditor functionality, edge cases, and end-to-end workflow (v0.1.2b)
+- `Config` class (`src/config.py`) — centralized configuration module that loads `.env` via python-dotenv at import time, provides `OPENAI_API_KEY`, `OPENAI_MODEL`, and `DEBUG` via properties and classmethods, with `validate()` for format/presence checks and `print_config()` for masked output (v0.1.2c)
+- Configuration module test suite (`tests/test_config.py`) with 34 tests covering imports, properties, defaults, DEBUG string→bool coercion (9 variants), validation pass/fail, print_config masking, edge cases, and end-to-end workflow (v0.1.2c)
 - Pytest marker registration (`pytest.ini`) with `unit`, `integration`, and `api` markers — eliminates 67+ `PytestUnknownMarkWarning` warnings across the test suite (v0.0.3c)
 - Raw metrics token consistency tests (`TestRawMetricsTokenConsistency`) with 7 new tests verifying raw_metrics.json token counts flow correctly through `analyze_llmlingua_results()` and `run_baseline()`, including malformed-input graceful degradation, logging source attribution, and compressed-token independence (v0.0.3c)
 
