@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ### Added
 
 - Project directory structure: `examples/`, `diagrams/` directories created; `src/__init__.py` populated with package docstring and `__version__`/`__author__` metadata; `tests/__init__.py` populated with package docstring; `.gitkeep` files added to `benchmarks/samples/`, `examples/`, `diagrams/` for git tracking of empty directories (v0.1.3a)
+- MIT License file (`LICENSE`) with 2026 copyright year for open-source distribution (v0.1.3b)
+- Enhanced `.env.example` with full environment variable template: LLM provider config, application settings (`ENV`, `LOG_LEVEL`), Streamlit UI config, benchmarking settings, and usage instructions (v0.1.3b)
 - Python 3.11 virtual environment (`.venv/`) with pip 26.0.1 — recreated from broken Python 3.14-based venv inherited from prior machine (v0.1.1a)
 - Environment verification test suite (`tests/test_environment.py`) with 10 tests covering Python version, venv activation, pip availability, executable path, edge cases, and log output (v0.1.1a)
 - LLM orchestration libraries: `langchain` 1.2.9, `langchain-openai` 1.1.7, `tiktoken` 0.12.0 — core dependencies for the encoder pipeline (v0.1.1b)
