@@ -15,7 +15,7 @@ machine-optimized strings while preserving semantic meaning.
 <!-- UPDATE THESE TWO LINES AS YOU PROGRESS -->
 
 CURRENT PHASE: 0 — Research & Discovery (v0.0.x)
-ACTIVE VERSION: v0.0.3d — Metrics Documentation & Reporting
+ACTIVE VERSION: v0.1.3a — Directory Structure Creation
 
 Roadmap: Research (v0.0.x) → Environment (v0.1.x) → Encoder (v0.2.x) → Demo (v0.3.x) → Release (v0.4.x)
 
