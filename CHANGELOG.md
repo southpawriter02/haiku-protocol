@@ -16,6 +16,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Supporting libraries: `streamlit` 1.54.0 (demo UI), `python-dotenv` 1.2.1 (env config), `llmlingua` 0.2.2 (benchmarking baseline) (v0.1.1c)
 - Frozen `requirements.txt` with 91 pinned package versions capturing full dependency tree (v0.1.1c)
 - Supporting library verification test suite (`tests/test_supporting_libraries.py`) with 15 tests covering importability, requirements.txt validation, functional checks, edge cases, and log output (v0.1.1c)
+- Environment files `.env` (with 0o600 permissions) and `.env.example` (template with placeholder values) for API key management (v0.1.2a)
+- `EnvValidator` class (`src/validate_env.py`) for programmatic validation of environment files — checks naming conventions, required variables, API key format, and file permissions (v0.1.2a)
+- Environment file verification test suite (`tests/test_env_validator.py`) with 28 tests covering file existence, permissions, naming conventions, validator functionality, edge cases, and log output (v0.1.2a)
 - Pytest marker registration (`pytest.ini`) with `unit`, `integration`, and `api` markers — eliminates 67+ `PytestUnknownMarkWarning` warnings across the test suite (v0.0.3c)
 - Raw metrics token consistency tests (`TestRawMetricsTokenConsistency`) with 7 new tests verifying raw_metrics.json token counts flow correctly through `analyze_llmlingua_results()` and `run_baseline()`, including malformed-input graceful degradation, logging source attribution, and compressed-token independence (v0.0.3c)
 
