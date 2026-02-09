@@ -77,8 +77,8 @@ build/
 benchmarks/results/
 
 # Design Documents (Notion export / working drafts)
-docs/design/
-CLAUDE.md
+#docs/design/
+#CLAUDE.md
 
 # Demo and Cache
 *.pkl
