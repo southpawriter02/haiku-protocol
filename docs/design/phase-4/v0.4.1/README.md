@@ -8,9 +8,9 @@
 
 **Status:** ⬜ Not Started
 
-**Duration:** 45-60 minutes
+**Duration:** 45–60 minutes (across 3 sub-parts)
 
-**Deliverable:** Polished [README.md](http://README.md) with quick start guide
+**Deliverable:** Polished README.md with quick start guide
 
 </aside>
 
@@ -18,7 +18,19 @@
 
 ## Objective
 
-Create a README that **sells the project in 30 seconds** and provides clear setup instructions.
+Create a README that **sells the project in 30 seconds** and provides clear setup instructions. The README serves three audiences simultaneously: non-technical readers (value proposition), technical readers (architecture + benchmarks), and developers (Quick Start).
+
+---
+
+## Sub-Parts
+
+| Version | Name | Duration | Deliverable |
+|---------|------|----------|-------------|
+| [v0.4.1a](readme_header_and_pitch.md) | Project Header, Problem Statement & Solution Pitch | 15–20 min | Title, badges, demo visual, problem/solution sections with before/after table |
+| [v0.4.1b](quickstart_and_benchmarks.md) | Quick Start Guide & Benchmark Table | 20–25 min | Prerequisites, installation commands, benchmark comparison table, architecture overview |
+| [v0.4.1c](documentation_and_contributing.md) | Documentation Links, Contributing & License | 10–15 min | Doc links, contributing instructions, license, acknowledgments, footer |
+
+**Validation:** Quality checklist (GFM rendering, link verification, command testing — no pytest)
 
 ---
 

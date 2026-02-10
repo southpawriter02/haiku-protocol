@@ -8,9 +8,9 @@
 
 **Status:** ⬜ Not Started
 
-**Duration:** 30-45 minutes
+**Duration:** 30–45 minutes (across 3 sub-parts)
 
-**Deliverable:** [ARCHITECTURE.md](http://ARCHITECTURE.md) with system design documentation
+**Deliverable:** ARCHITECTURE.md with system design documentation + STYLE_GUIDE.md finalization
 
 </aside>
 
@@ -18,11 +18,23 @@
 
 ## Objective
 
-Create comprehensive architecture documentation that demonstrates technical depth and software engineering competence.
+Create comprehensive architecture documentation that demonstrates technical depth and software engineering competence. Also finalize the STYLE_GUIDE.md (review-and-polish pass against implemented synthesizer, per decision P4-004).
 
 ---
 
-## Template: [ARCHITECTURE.md](http://ARCHITECTURE.md)
+## Sub-Parts
+
+| Version | Name | Duration | Deliverable |
+|---------|------|----------|-------------|
+| [v0.4.2a](system_overview_and_components.md) | System Overview & Component Architecture | 10–15 min | Overview paragraph, key principles table, system components ASCII diagram, responsibilities table |
+| [v0.4.2b](dataflow_and_module_reference.md) | Data Flow Documentation & Module Reference | 10–15 min | 4-stage pipeline walkthrough with concrete data shapes, public API for all 5 modules |
+| [v0.4.2c](design_decisions_and_style_guide.md) | Design Decisions, Future Considerations & Style Guide | 10–15 min | 2 design decisions with trade-offs, 5 future enhancements, scalability table, STYLE_GUIDE.md finalization |
+
+**Validation:** Quality checklist (accuracy against actual code, ASCII rendering, link verification)
+
+---
+
+## Template: ARCHITECTURE.md
 
 ```markdown
 # Architecture: The Haiku Protocol

@@ -346,15 +346,19 @@ All three Phase 3 sub-parts are **consumers** of Phase 2. They do not modify, ex
 v0.3.0 — Phase 3: Demo & Visualization
 │
 ├── v0.3.1 — Streamlit UI Development (60–90 min)
-│   └── Single-file Streamlit app with input, output, metrics, sidebar, error handling
+│   ├── v0.3.1a — Page Configuration & Layout Foundation (15–20 min)
+│   ├── v0.3.1b — Input, Processing & Output Display (25–35 min)
+│   └── v0.3.1c — Metrics Dashboard & Celebration (15–20 min)
 │
 ├── v0.3.2 — Test Suite Implementation (45–60 min)
-│   ├── Updated conftest.py with shared fixtures
-│   └── test_validation.py with 3 hypothesis test classes + compression metrics tests
+│   ├── v0.3.2a — Shared Test Fixtures (conftest.py) (10–15 min)
+│   ├── v0.3.2b — Hypothesis Validation Tests (25–35 min)
+│   └── v0.3.2c — Compression Metrics Tests & Coverage (10–15 min)
 │
 └── v0.3.3 — Benchmark Integration (45–60 min)
-    ├── BenchmarkRunner class with LLMLingua comparison
-    └── results.json output with summary and per-document details
+    ├── v0.3.3a — Benchmark Data Model & Configuration (10–15 min)
+    ├── v0.3.3b — BenchmarkRunner Core Implementation (20–30 min)
+    └── v0.3.3c — Report Generation & CLI Entry Point (15–20 min)
 ```
 
 **Total Estimated Duration:** 150–210 minutes (~2.5–3.5 hours)

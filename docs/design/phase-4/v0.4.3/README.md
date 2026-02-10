@@ -8,7 +8,7 @@
 
 **Status:** ⬜ Not Started
 
-**Duration:** 30-45 minutes
+**Duration:** 30–45 minutes (across 3 sub-parts)
 
 **Deliverable:** GitHub release and portfolio integration
 
@@ -18,7 +18,19 @@
 
 ## Objective
 
-Publish the project to GitHub with proper versioning and prepare portfolio artifacts.
+Publish the project to GitHub with proper versioning and prepare portfolio artifacts. This is the **final sub-part** of the entire Haiku Protocol project — after v0.4.3, the project is complete.
+
+---
+
+## Sub-Parts
+
+| Version | Name | Duration | Deliverable |
+|---------|------|----------|-------------|
+| [v0.4.3a](pre_release_verification.md) | Pre-Release Verification & CHANGELOG Finalization | 10–15 min | 12-item verification checklist, secret scanning, CHANGELOG v1.0.0 entry |
+| [v0.4.3b](git_tag_and_release.md) | Git Tag, GitHub Release & Repository Configuration | 10–15 min | Final commit, annotated v1.0.0 tag, GitHub release notes, repo configuration |
+| [v0.4.3c](portfolio_artifacts.md) | Demo GIF, Resume Bullets & Portfolio Packaging | 10–15 min | Demo recording, 3 resume bullets, LinkedIn post draft, portfolio website entry |
+
+**Validation:** Pre-release checklist (manual verification — no automated CI)
 
 ---
 

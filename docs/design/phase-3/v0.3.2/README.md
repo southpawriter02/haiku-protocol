@@ -8,9 +8,9 @@
 
 **Status:** ⬜ Not Started
 
-**Duration:** 45-60 minutes
+**Duration:** 45–60 minutes (across 3 sub-parts)
 
-**Deliverable:** Complete pytest test suite
+**Deliverable:** Complete pytest test suite (`conftest.py` update + `test_validation.py`)
 
 </aside>
 
@@ -18,7 +18,19 @@
 
 ## Objective
 
-Build a comprehensive test suite that proves the Haiku Protocol works as claimed.
+Build a comprehensive test suite that proves the Haiku Protocol works as claimed. Implements the three hypothesis-validation tests from the original Technical Design Document (Prerequisite, Context Overflow, Semantic Fidelity) plus compression metrics tests.
+
+---
+
+## Sub-Parts
+
+| Version | Name | Duration | Deliverable |
+|---------|------|----------|-------------|
+| [v0.3.2a](shared_fixtures.md) | Shared Test Fixtures (conftest.py) | 10–15 min | 4 shared fixtures: simple/medium/complex docs + sample entities |
+| [v0.3.2b](hypothesis_validation_tests.md) | Hypothesis Validation Tests | 25–35 min | 3 test classes (6 tests): Prerequisite, Context Overflow, Semantic Fidelity |
+| [v0.3.2c](compression_metrics_tests.md) | Compression Metrics Tests & Coverage | 10–15 min | TestCompressionMetrics (2 tests), coverage verification, pytest commands |
+
+**Total: 8 tests in test_validation.py | Coverage target: ≥80% across src/**
 
 ---
 

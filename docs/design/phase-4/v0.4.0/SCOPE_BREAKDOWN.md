@@ -382,17 +382,19 @@ Phase 4 is a **consumer and packager** of earlier phases' outputs. It reads, ref
 v0.4.0 — Phase 4: Documentation & Release
 │
 ├── v0.4.1 — README & Quick Start (45–60 min)
-│   └── Polished README.md replacing existing stub
+│   ├── v0.4.1a — Project Header, Problem Statement & Solution Pitch (15–20 min)
+│   ├── v0.4.1b — Quick Start Guide & Benchmark Table (20–25 min)
+│   └── v0.4.1c — Documentation Links, Contributing & License (10–15 min)
 │
 ├── v0.4.2 — Architecture Documentation (30–45 min)
-│   ├── ARCHITECTURE.md with system design, data flow, module reference
-│   └── STYLE_GUIDE.md finalization (review-and-polish pass)
+│   ├── v0.4.2a — System Overview & Component Architecture (10–15 min)
+│   ├── v0.4.2b — Data Flow Documentation & Module Reference (10–15 min)
+│   └── v0.4.2c — Design Decisions, Future Considerations & Style Guide (10–15 min)
 │
 └── v0.4.3 — GitHub Release & Portfolio (30–45 min)
-    ├── Pre-release verification checklist
-    ├── Final commit, v1.0.0 tag, GitHub release notes
-    ├── Demo GIF creation
-    └── Portfolio artifacts (resume bullets, LinkedIn post, portfolio entry)
+    ├── v0.4.3a — Pre-Release Verification & CHANGELOG Finalization (10–15 min)
+    ├── v0.4.3b — Git Tag, GitHub Release & Repository Configuration (10–15 min)
+    └── v0.4.3c — Demo GIF, Resume Bullets & Portfolio Packaging (10–15 min)
 ```
 
 **Total Estimated Duration:** 105–150 minutes (~1.75–2.5 hours)

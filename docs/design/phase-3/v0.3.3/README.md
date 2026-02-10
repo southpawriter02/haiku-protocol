@@ -8,9 +8,9 @@
 
 **Status:** ⬜ Not Started
 
-**Duration:** 45-60 minutes
+**Duration:** 45–60 minutes (across 3 sub-parts)
 
-**Deliverable:** LLMLingua benchmark comparison
+**Deliverable:** LLMLingua benchmark comparison (`benchmarks/llmlingua_comparison.py` + `benchmarks/results.json`)
 
 </aside>
 
@@ -18,7 +18,19 @@
 
 ## Objective
 
-Compare Haiku Protocol compression against Microsoft's LLMLingua to demonstrate competitive or superior performance.
+Compare Haiku Protocol compression against Microsoft's LLMLingua to demonstrate competitive or superior performance. Produces a structured JSON report with per-document results and aggregate summary.
+
+---
+
+## Sub-Parts
+
+| Version | Name | Duration | Deliverable |
+|---------|------|----------|-------------|
+| [v0.3.3a](benchmark_data_model.md) | Benchmark Data Model & Configuration | 10–15 min | `BenchmarkResult` dataclass, LLMLingua import guard, default document corpus |
+| [v0.3.3b](benchmark_runner.md) | BenchmarkRunner Core Implementation | 20–30 min | `BenchmarkRunner` class with compress, run_benchmark, run_benchmark_suite |
+| [v0.3.3c](report_generation.md) | Report Generation & CLI Entry Point | 15–20 min | `generate_report()`, `run_benchmarks()`, JSON output, `__main__` block |
+
+**Validation:** Acceptance criteria (run script + inspect results.json — no pytest)**
 
 ---
 

@@ -8,9 +8,9 @@
 
 **Status:** ⬜ Not Started
 
-**Duration:** 60-90 minutes
+**Duration:** 60–90 minutes (across 3 sub-parts)
 
-**Deliverable:** [`app.py`](http://app.py) — Interactive Streamlit demo
+**Deliverable:** `app.py` — Interactive Streamlit demo
 
 </aside>
 
@@ -18,7 +18,19 @@
 
 ## Objective
 
-Build a polished, interactive web UI that demonstrates the Haiku Protocol in action. This is your **portfolio showcase**.
+Build a polished, interactive web UI that demonstrates the Haiku Protocol in action. This is your **portfolio showcase**. The Streamlit app wraps the `encode()` pipeline in a web interface with text input, side-by-side before/after comparison, and a metrics dashboard.
+
+---
+
+## Sub-Parts
+
+| Version | Name | Duration | Deliverable |
+|---------|------|----------|-------------|
+| [v0.3.1a](page_config_and_layout.md) | Page Configuration & Layout Foundation | 15–20 min | Page config, CSS theming, header/footer, sidebar layout |
+| [v0.3.1b](input_processing_output.md) | Input, Processing & Output Display | 25–35 min | Text area, compress/clear buttons, processing flow, side-by-side results |
+| [v0.3.1c](metrics_dashboard.md) | Metrics Dashboard & Celebration | 15–20 min | 4 metric cards, progress bar, balloons animation, raw CNL toggle |
+
+**Testing:** Manual acceptance criteria (no pytest — UI tested visually)
 
 ---
 
