@@ -213,7 +213,7 @@ class TestEnvValidatorFunctionality:
         with tempfile.NamedTemporaryFile(
             mode="w", suffix=".env", delete=False
         ) as f:
-            f.write("OPENAI_API_KEY=test-key-mock12345678901234567890\n")
+            f.write("OPENAI_API_KEY=sk-test-mock12345678901234567890\n")
             f.write("OPENAI_MODEL=gpt-4\n")
             f.write("DEBUG=false\n")
             tmp_path = f.name
@@ -224,7 +224,7 @@ class TestEnvValidatorFunctionality:
             assert result is True
             assert len(validator.variables) == 3
             assert validator.variables["OPENAI_API_KEY"] == (
-                "test-key-mock12345678901234567890"
+                "sk-test-mock12345678901234567890"
             )
         finally:
             os.unlink(tmp_path)
@@ -236,7 +236,7 @@ class TestEnvValidatorFunctionality:
         ) as f:
             f.write("# This is a comment\n")
             f.write("\n")
-            f.write("OPENAI_API_KEY=test-key-mock12345678901234567890\n")
+            f.write("OPENAI_API_KEY=sk-test-mock12345678901234567890\n")
             f.write("# Another comment\n")
             f.write("\n")
             tmp_path = f.name
@@ -309,7 +309,7 @@ class TestEnvValidatorFunctionality:
         with tempfile.NamedTemporaryFile(
             mode="w", suffix=".env", delete=False
         ) as f:
-            f.write("OPENAI_API_KEY=placeholder-your-key-here\n")
+            f.write("OPENAI_API_KEY=sk-your-key-here\n")
             tmp_path = f.name
 
         try:
@@ -327,7 +327,7 @@ class TestEnvValidatorFunctionality:
         with tempfile.NamedTemporaryFile(
             mode="w", suffix=".env", delete=False
         ) as f:
-            f.write("OPENAI_API_KEY=test-key-mock12345678901234567890\n")
+            f.write("OPENAI_API_KEY=sk-test-mock12345678901234567890\n")
             f.write("DEBUG=yes\n")
             tmp_path = f.name
 
@@ -432,7 +432,7 @@ class TestEnvValidatorEdgeCases:
         with tempfile.NamedTemporaryFile(
             mode="w", suffix=".env", delete=False
         ) as f:
-            f.write("OPENAI_API_KEY=tooshort\n")
+            f.write("OPENAI_API_KEY=sk-short\n")
             tmp_path = f.name
 
         try:
