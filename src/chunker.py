@@ -9,16 +9,21 @@ pipeline.
 Classes:
     Chunk: Dataclass representing a document segment (v0.2.1a)
     ChunkingConfig: Configuration for chunking behavior (v0.2.1a)
-    DocumentChunker: Document segmentation orchestrator (stub, v0.2.1b)
+    MarkdownChunker: Header-based markdown splitter (v0.2.1b)
+    DocumentChunker: Document segmentation orchestrator (stub)
+
+Functions:
+    chunk_document: Convenience wrapper for one-call chunking (v0.2.1b)
 
 Implementation Status:
     - v0.2.1a: Chunk data model, ChunkingConfig, serialization
-    - STUB: DocumentChunker (v0.2.1b — MarkdownChunker Core)
+    - v0.2.1b: MarkdownChunker core, chunk_document() convenience function
 
 Related: v0.2.1 — Chunking Module
 """
 
 import logging
+import re
 from typing import List, Dict, Any, Optional
 from dataclasses import dataclass
 
@@ -227,3 +232,255 @@ class DocumentChunker:
         raise NotImplementedError(
             "Chunk merging scheduled for v0.2.1"
         )
+
+
+class MarkdownChunker:
+    """Split markdown documents into Chunk objects at header boundaries.
+
+    The chunker scans a markdown string line-by-line, identifies headers
+    using a regex pattern, and emits Chunk objects for each section of
+    text bounded by consecutive headers within the configured depth range.
+
+    Attributes:
+        config: ChunkingConfig controlling split behavior.
+
+    Example:
+        >>> chunker = MarkdownChunker(ChunkingConfig(min_level=2, max_level=3))
+        >>> chunks = chunker.chunk("## Intro\\nHello\\n## Next\\nWorld")
+        >>> len(chunks)
+        2
+        >>> chunks[0].title
+        'Intro'
+    """
+
+    HEADER_PATTERN = re.compile(r'^(#{1,6})\s+(.+)$')
+
+    def __init__(self, config: Optional[ChunkingConfig] = None) -> None:
+        """Initialize the chunker.
+
+        Args:
+            config: Chunking configuration. If None, uses default
+                ChunkingConfig (split on ## and ###).
+        """
+        self.config = config or ChunkingConfig()
+        logger.info(
+            "MarkdownChunker initialized: min_level=%d, max_level=%d",
+            self.config.min_level, self.config.max_level,
+        )
+
+    def chunk(self, document: str) -> List[Chunk]:
+        """Split a markdown document into chunks.
+
+        Scans the document line by line. Each header within the
+        configured level range triggers a new chunk. Text between
+        headers becomes the chunk's content.
+
+        Args:
+            document: Raw markdown string to split.
+
+        Returns:
+            List of Chunk objects in document order. Empty documents
+            return an empty list. Documents with no matching headers
+            return a single preamble chunk (if include_preamble is True)
+            or an empty list.
+
+        Raises:
+            TypeError: If document is not a string.
+        """
+        if not isinstance(document, str):
+            raise TypeError(
+                "document must be a string, got %s" % type(document).__name__
+            )
+
+        if not document.strip():
+            logger.warning("Empty document provided, returning empty chunk list")
+            return []
+
+        lines = document.split("\n")
+        chunks: List[Chunk] = []
+        chunk_index = 1
+
+        # --- Current chunk state ---
+        current_title: Optional[str] = None
+        current_level: int = 0
+        current_lines: List[str] = []
+        current_source_line: int = 1
+        in_code_block = False
+
+        for line_num, line in enumerate(lines, start=1):
+            # --- Fenced code block state tracking ---
+            stripped = line.strip()
+            if stripped.startswith("```"):
+                in_code_block = not in_code_block
+
+            # --- Header detection ---
+            match = self.HEADER_PATTERN.match(line)
+
+            if match and in_code_block:
+                logger.warning(
+                    "Header-like line inside code block at line %d, "
+                    "skipping as split point",
+                    line_num,
+                )
+                current_lines.append(line)
+                continue
+
+            if match and not in_code_block:
+                hashes, title = match.group(1), match.group(2)
+                level = len(hashes)
+
+                # --- Check if header is within configured range ---
+                if self.config.min_level <= level <= self.config.max_level:
+                    # Flush current buffer
+                    content = "\n".join(current_lines).strip()
+
+                    if current_title is not None:
+                        # Emit the previous chunk
+                        word_count, char_count = self._compute_stats(content)
+                        chunk = Chunk(
+                            id=self._make_chunk_id(chunk_index),
+                            title=current_title,
+                            level=current_level,
+                            content=content,
+                            word_count=word_count if self.config.compute_stats else 0,
+                            char_count=char_count if self.config.compute_stats else 0,
+                            source_line=(
+                                current_source_line
+                                if self.config.track_source_lines else 0
+                            ),
+                        )
+                        chunks.append(chunk)
+                        logger.debug(
+                            "New chunk started: id=%s, title=%s, level=%d at line %d",
+                            chunk.id, chunk.title, chunk.level, chunk.source_line,
+                        )
+                        chunk_index += 1
+                    elif content and self.config.include_preamble:
+                        # Emit preamble chunk
+                        word_count, char_count = self._compute_stats(content)
+                        preamble = Chunk(
+                            id=self._make_chunk_id(chunk_index),
+                            title="(Preamble)",
+                            level=0,
+                            content=content,
+                            word_count=word_count if self.config.compute_stats else 0,
+                            char_count=char_count if self.config.compute_stats else 0,
+                            source_line=1 if self.config.track_source_lines else 0,
+                        )
+                        chunks.append(preamble)
+                        logger.debug(
+                            "Preamble chunk created: %d chars", char_count,
+                        )
+                        chunk_index += 1
+
+                    # Start new chunk
+                    current_title = title.strip()
+                    current_level = level
+                    current_lines = []
+                    current_source_line = line_num
+                    continue
+                else:
+                    logger.debug(
+                        "Header at level %d outside range [%d, %d], "
+                        "treating as content",
+                        level, self.config.min_level, self.config.max_level,
+                    )
+
+            # --- Append line to current buffer ---
+            current_lines.append(line)
+
+        # --- Flush final buffer ---
+        content = "\n".join(current_lines).strip()
+
+        if current_title is not None:
+            word_count, char_count = self._compute_stats(content)
+            chunk = Chunk(
+                id=self._make_chunk_id(chunk_index),
+                title=current_title,
+                level=current_level,
+                content=content,
+                word_count=word_count if self.config.compute_stats else 0,
+                char_count=char_count if self.config.compute_stats else 0,
+                source_line=(
+                    current_source_line
+                    if self.config.track_source_lines else 0
+                ),
+            )
+            chunks.append(chunk)
+            logger.debug(
+                "New chunk started: id=%s, title=%s, level=%d at line %d",
+                chunk.id, chunk.title, chunk.level, chunk.source_line,
+            )
+        elif content and self.config.include_preamble:
+            # Entire document is preamble (no matching headers)
+            word_count, char_count = self._compute_stats(content)
+            preamble = Chunk(
+                id=self._make_chunk_id(chunk_index),
+                title="(Preamble)",
+                level=0,
+                content=content,
+                word_count=word_count if self.config.compute_stats else 0,
+                char_count=char_count if self.config.compute_stats else 0,
+                source_line=1 if self.config.track_source_lines else 0,
+            )
+            chunks.append(preamble)
+            logger.debug("Preamble chunk created: %d chars", char_count)
+
+        logger.info(
+            "Chunking complete: %d chunks from %d-line document",
+            len(chunks), len(lines),
+        )
+        return chunks
+
+    def _compute_stats(self, content: str) -> tuple:
+        """Compute word and character counts for content.
+
+        Args:
+            content: Text content to analyze.
+
+        Returns:
+            Tuple of (word_count, char_count).
+        """
+        char_count = len(content)
+        word_count = len(content.split()) if content.strip() else 0
+        return word_count, char_count
+
+    def _make_chunk_id(self, index: int) -> str:
+        """Generate a zero-padded chunk ID.
+
+        Args:
+            index: 1-based chunk sequence number.
+
+        Returns:
+            String in format 'chunk-NNN'.
+        """
+        return f"chunk-{index:03d}"
+
+
+def chunk_document(
+    document: str,
+    min_level: int = 2,
+    max_level: int = 3,
+    include_preamble: bool = True,
+) -> List[dict]:
+    """Chunk a markdown document and return dictionaries.
+
+    Convenience wrapper around MarkdownChunker for quick usage.
+
+    Args:
+        document: Raw markdown string.
+        min_level: Minimum header level to split on.
+        max_level: Maximum header level to split on.
+        include_preamble: Whether to capture text before first header.
+
+    Returns:
+        List of chunk dictionaries (via Chunk.to_dict()).
+    """
+    config = ChunkingConfig(
+        min_level=min_level,
+        max_level=max_level,
+        include_preamble=include_preamble,
+    )
+    chunker = MarkdownChunker(config)
+    return [c.to_dict() for c in chunker.chunk(document)]
+
