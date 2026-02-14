@@ -1,10 +1,9 @@
 """
-chunker.py - Document Chunking and Segmentation
-================================================
+chunker.py — Document Chunking Module
+======================================
 
-Segments markdown documents into semantically bounded chunks
-based on header boundaries for processing through the encoder
-pipeline.
+Splits markdown documents into semantically bounded chunks at header
+boundaries. Part of the Haiku Protocol encoder pipeline (v0.2.1).
 
 Classes:
     Chunk: Dataclass representing a document segment (v0.2.1a)
@@ -16,10 +15,15 @@ Classes:
 Functions:
     chunk_document: Convenience wrapper for one-call chunking (v0.2.1b)
 
-Implementation Status:
-    - v0.2.1a: Chunk data model, ChunkingConfig, serialization
-    - v0.2.1b: MarkdownChunker core, chunk_document() convenience function
-    - v0.2.1c: Hierarchy resolution, small chunk merging, metadata enrichment
+Sub-parts:
+    v0.2.1a — Chunk data model (Chunk, ChunkingConfig)
+    v0.2.1b — MarkdownChunker core implementation
+    v0.2.1c — Advanced features (hierarchy, merging, metadata)
+    v0.2.1d — Integration testing and benchmarks
+
+Usage:
+    from src.chunker import chunk_document
+    chunks = chunk_document("## Hello\\nWorld", min_level=2)
 
 Related: v0.2.1 — Chunking Module
 """

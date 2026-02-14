@@ -6,7 +6,7 @@
 
 **Parent:** v0.2.0 — Encoder Development
 
-**Status:** ⬜ Not Started
+**Status:** ✅ Complete
 
 **Duration:** 105–160 minutes (across 4 sub-parts)
 
@@ -24,12 +24,12 @@ Build a module that splits markdown documents into logical chunks based on heade
 
 ## Sub-Parts
 
-| Version | Name | Duration | Deliverable |
-|---------|------|----------|-------------|
-| [v0.2.1a](chunk_data_model.md) | Chunk Data Model & Interfaces | 20–30 min | `Chunk` dataclass, `ChunkingConfig`, serialization, 23+ tests |
-| [v0.2.1b](markdown_chunker_core.md) | MarkdownChunker Core Implementation | 30–45 min | Header-based splitting, code block awareness, preamble handling, 31+ tests |
-| [v0.2.1c](advanced_chunking_features.md) | Advanced Chunking Features | 30–45 min | Parent-child hierarchy, chunk merging, metadata enrichment, 27+ tests |
-| [v0.2.1d](integration_testing.md) | Integration Testing & Benchmark Validation | 25–35 min | End-to-end tests, benchmark corpus, performance validation, 25+ tests |
+| Version                                  | Name                                       | Duration  | Deliverable                                                                |
+| ---------------------------------------- | ------------------------------------------ | --------- | -------------------------------------------------------------------------- |
+| [v0.2.1a](chunk_data_model.md)           | Chunk Data Model & Interfaces              | 20–30 min | `Chunk` dataclass, `ChunkingConfig`, serialization, 23+ tests              |
+| [v0.2.1b](markdown_chunker_core.md)      | MarkdownChunker Core Implementation        | 30–45 min | Header-based splitting, code block awareness, preamble handling, 31+ tests |
+| [v0.2.1c](advanced_chunking_features.md) | Advanced Chunking Features                 | 30–45 min | Parent-child hierarchy, chunk merging, metadata enrichment, 27+ tests      |
+| [v0.2.1d](integration_testing.md)        | Integration Testing & Benchmark Validation | 25–35 min | End-to-end tests, benchmark corpus, performance validation, 25+ tests      |
 
 **Total: 100+ tests across all sub-parts**
 
@@ -78,6 +78,7 @@ Build a module that splits markdown documents into logical chunks based on heade
 ## Implementation: `chunker.py`
 
 See individual sub-part specs for detailed code:
+
 - [v0.2.1a — Data Model](chunk_data_model.md) — `Chunk`, `ChunkingConfig`, serialization
 - [v0.2.1b — Core Algorithm](markdown_chunker_core.md) — `MarkdownChunker.chunk()`, `chunk_document()`
 - [v0.2.1c — Advanced Features](advanced_chunking_features.md) — `resolve_hierarchy()`, `merge_small_chunks()`, `enrich_metadata()`
