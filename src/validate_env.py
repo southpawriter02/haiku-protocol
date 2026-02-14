@@ -29,12 +29,16 @@ class EnvValidator:
     ENV_VAR_PATTERN = re.compile(r"^([A-Z_][A-Z0-9_]*)=(.*)$")
 
     # Required variables that must be present
+    # (OPENAI_API_KEY becomes optional for local providers)
     REQUIRED_VARS = {"OPENAI_API_KEY"}
 
     # Optional variables with default values
     OPTIONAL_VARS = {
         "OPENAI_MODEL": "gpt-4",
         "DEBUG": "false",
+        "LLM_PROVIDER": "openai",
+        "LLM_BASE_URL": "",
+        "LLM_API_KEY": "",
     }
 
     def __init__(self, env_file: str = ".env") -> None:
@@ -104,7 +108,14 @@ class EnvValidator:
         Returns:
             True if all required variables are found.
         """
-        missing = self.REQUIRED_VARS - set(self.variables.keys())
+        provider = self.variables.get("LLM_PROVIDER", "openai").lower()
+        required = set(self.REQUIRED_VARS)
+
+        # OPENAI_API_KEY is not required for local providers
+        if provider in ("ollama", "lmstudio"):
+            required.discard("OPENAI_API_KEY")
+
+        missing = required - set(self.variables.keys())
         if missing:
             for var in missing:
                 self.errors.append(f"Missing required variable: {var}")
@@ -114,9 +125,18 @@ class EnvValidator:
     def validate_api_key_format(self) -> bool:
         """Validate API key has correct format (starts with 'sk-').
 
+        Skips validation for local providers (Ollama, LM Studio)
+        since they don't require API keys.
+
         Returns:
             True if the API key format is valid or a known placeholder.
         """
+        provider = self.variables.get("LLM_PROVIDER", "openai").lower()
+
+        # Local providers don't need a real API key
+        if provider in ("ollama", "lmstudio"):
+            return True
+
         api_key = self.variables.get("OPENAI_API_KEY", "")
 
         if not api_key:

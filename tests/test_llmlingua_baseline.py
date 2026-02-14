@@ -20,6 +20,24 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+# llmlingua_baseline requires either tiktoken or regex for token counting
+_has_tokenizer = False
+try:
+    import tiktoken
+    _has_tokenizer = True
+except ImportError:
+    try:
+        import regex
+        _has_tokenizer = True
+    except ImportError:
+        pass
+
+if not _has_tokenizer:
+    pytest.skip(
+        "Neither tiktoken nor regex installed — skipping llmlingua baseline tests",
+        allow_module_level=True,
+    )
+
 # Ensure project root is importable
 project_root = Path(__file__).parent.parent
 if str(project_root) not in sys.path:
@@ -177,6 +195,21 @@ def raw_metrics_file(tmp_path):
     path = tmp_path / "raw_metrics.json"
     path.write_text(json.dumps(metrics, indent=2))
     return path
+
+
+@pytest.fixture
+def mock_compressor_init():
+    """Mock initialize_compressor to return None (estimation fallback).
+
+    Prevents run_baseline() from downloading a real ~1GB model from
+    HuggingFace during unit tests. All documents will use the estimation
+    fallback path instead.
+    """
+    with patch(
+        "benchmarks.llmlingua_baseline.initialize_compressor",
+        return_value=None,
+    ):
+        yield
 
 
 # ═══════════════════════════════════════════════════════════════════
@@ -754,6 +787,7 @@ class TestLoggingOutput:
 # ═══════════════════════════════════════════════════════════════════
 
 
+@pytest.mark.usefixtures("mock_compressor_init")
 class TestRunBaseline:
     """Tests for run_baseline() orchestration function."""
 
@@ -851,6 +885,7 @@ class TestRunBaseline:
         assert len(results["comparison_table"]) == 3
 
 
+@pytest.mark.usefixtures("mock_compressor_init")
 class TestEndToEndUseCase:
     """End-to-end use case test simulating the full workflow."""
 
@@ -998,7 +1033,7 @@ class TestRawMetricsTokenConsistency:
 
     @pytest.mark.unit
     def test_run_baseline_passes_raw_metrics_tokens(
-        self, samples_dir, raw_metrics_file, tmp_path
+        self, samples_dir, raw_metrics_file, tmp_path, mock_compressor_init
     ):
         """run_baseline reads token counts from raw_metrics.json and passes them."""
         # Acceptance Criterion: "Compression metrics recorded: original_tokens"
@@ -1017,7 +1052,7 @@ class TestRawMetricsTokenConsistency:
 
     @pytest.mark.unit
     def test_run_baseline_handles_malformed_raw_metrics(
-        self, samples_dir, tmp_path
+        self, samples_dir, tmp_path, mock_compressor_init
     ):
         """run_baseline handles malformed raw_metrics gracefully."""
         # Write malformed JSON that's valid JSON but missing expected structure

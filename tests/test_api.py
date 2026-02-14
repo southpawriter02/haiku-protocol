@@ -40,12 +40,13 @@ logger = logging.getLogger(__name__)
 
 
 def test_api_connection(verbose: bool = True) -> bool:
-    """Test OpenAI API connection and key validity.
+    """Test LLM API connection and key validity.
 
     This function:
         1. Loads configuration from .env via Config class
-        2. Validates that OPENAI_API_KEY is present and valid
-        3. Initializes ChatOpenAI client with the API key
+        2. Validates provider, API key, and model settings
+        3. Initializes ChatOpenAI client (works with OpenAI,
+           Ollama, and LM Studio via OpenAI-compatible API)
         4. Sends a test prompt to verify connectivity
         5. Handles and reports various error scenarios
 
@@ -60,7 +61,7 @@ def test_api_connection(verbose: bool = True) -> bool:
     """
     if verbose:
         print("\n" + "=" * 70)
-        print("Haiku Protocol — API Connection Test (v0.1.2d)")
+        print("Haiku Protocol — API Connection Test (v0.1.3)")
         print("=" * 70)
 
     # ----------------------------------------
@@ -76,29 +77,39 @@ def test_api_connection(verbose: bool = True) -> bool:
             print("   Please check .env file and run again\n")
         return False
 
-    api_key = Config.get_openai_api_key()
+    api_key = Config.get_llm_api_key()
+    provider = Config.get_llm_provider()
+    model = Config.get_llm_model()
+    base_url = Config.get_llm_base_url()
 
     # ----------------------------------------
     # Step 2: Initialize LLM Client
     # ----------------------------------------
 
     if verbose:
-        print("[2/3] Initializing OpenAI client...")
+        print(f"[2/3] Initializing {provider} client...")
 
     try:
         from langchain_openai import ChatOpenAI
 
-        llm = ChatOpenAI(
+        kwargs = dict(
             api_key=api_key,
-            model=Config.get_openai_model(),
+            model=model,
             temperature=0,
             max_tokens=10,
             timeout=10,
             max_retries=1,
         )
+        if base_url:
+            kwargs["base_url"] = base_url
+
+        llm = ChatOpenAI(**kwargs)
 
         if verbose:
-            print(f"   Model: {Config.get_openai_model()}")
+            print(f"   Provider: {provider}")
+            print(f"   Model: {model}")
+            if base_url:
+                print(f"   Base URL: {base_url}")
             print("   Timeout: 10 seconds")
 
     except ImportError as e:
@@ -160,7 +171,7 @@ def test_api_connection(verbose: bool = True) -> bool:
                 print("\n   Actions:")
                 print("   1. Go to https://platform.openai.com/api-keys")
                 print("   2. Create a new API key")
-                print("   3. Update .env: OPENAI_API_KEY=sk-your-new-key")
+                print("   3. Update .env: OPENAI_API_KEY with your new key")
                 print("   4. Run this test again\n")
             return False
 
@@ -199,7 +210,7 @@ def test_api_connection(verbose: bool = True) -> bool:
             if verbose:
                 print("\n   Diagnosis: Invalid Model Name")
                 print(
-                    f"   Model '{Config.get_openai_model()}' "
+                    f"   Model '{model}' "
                     "does not exist"
                 )
                 print("\n   Valid models:")
@@ -269,6 +280,11 @@ def estimate_api_cost(num_requests: int = 1) -> dict:
 
 
 @pytest.mark.api
+@pytest.mark.skipif(
+    not os.getenv("OPENAI_API_KEY")
+    and os.getenv("LLM_PROVIDER", "openai").lower() == "openai",
+    reason="OPENAI_API_KEY not set and provider is openai — skipping live API test",
+)
 def test_api_connection_pytest():
     """Pytest-compatible version of API connection test.
 

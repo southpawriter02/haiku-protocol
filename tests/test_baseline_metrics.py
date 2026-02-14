@@ -16,6 +16,24 @@ import pytest
 import sys
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "benchmarks"))
+
+# baseline_metrics requires either tiktoken or regex for tokenization
+_has_tokenizer = False
+try:
+    import tiktoken
+    _has_tokenizer = True
+except ImportError:
+    try:
+        import regex
+        _has_tokenizer = True
+    except ImportError:
+        pass
+
+if not _has_tokenizer:
+    pytest.skip(
+        "Neither tiktoken nor regex installed — skipping baseline metrics tests",
+        allow_module_level=True,
+    )
 from baseline_metrics import (
     count_conditions,
     count_commands,

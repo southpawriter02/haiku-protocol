@@ -251,7 +251,7 @@ class TestConfigValidation:
         """validate() returns True with a valid sk- prefixed key."""
         _set_env(
             "OPENAI_API_KEY",
-            "sk-proj-validkeytestinglong1234567890abcdefghijklmno",
+            "sk-test-fakekeytestinglong1234567890abcdefghijklmnop",
         )
         _set_env("OPENAI_MODEL", "gpt-4")
         assert Config.validate() is True
@@ -299,7 +299,7 @@ class TestConfigValidation:
         """validate() prints success message when passing."""
         _set_env(
             "OPENAI_API_KEY",
-            "sk-proj-validkeytestinglong1234567890abcdefghijklmno",
+            "sk-test-fakekeytestinglong1234567890abcdefghijklmnop",
         )
         _set_env("OPENAI_MODEL", "gpt-4")
         Config.validate()
@@ -323,8 +323,9 @@ class TestPrintConfig:
 
         captured = capsys.readouterr()
         assert "Configuration Settings" in captured.out
-        assert "OPENAI_API_KEY" in captured.out
-        assert "OPENAI_MODEL" in captured.out
+        assert "LLM_PROVIDER" in captured.out
+        assert "API_KEY" in captured.out
+        assert "MODEL" in captured.out
         assert "DEBUG" in captured.out
 
     def test_print_config_masks_secrets(self, capsys):
@@ -333,15 +334,15 @@ class TestPrintConfig:
         try:
             _set_env(
                 "OPENAI_API_KEY",
-                "sk-proj-secretkey1234567890abcdefghij",
+                "sk-test-secretkey1234567890abcdefghij",
             )
             Config.print_config(mask_secrets=True)
 
             captured = capsys.readouterr()
             # Full key should NOT appear
-            assert "sk-proj-secretkey1234567890abcdefghij" not in captured.out
+            assert "sk-test-secretkey1234567890abcdefghij" not in captured.out
             # Masked key should appear (first 10 + ... + last 4)
-            assert "sk-proj-se..." in captured.out
+            assert "sk-test-se..." in captured.out
         finally:
             if original is not None:
                 _set_env("OPENAI_API_KEY", original)
@@ -387,7 +388,7 @@ class TestConfigEdgeCases:
         """Unusual model name triggers a warning."""
         _set_env(
             "OPENAI_API_KEY",
-            "sk-proj-validkeytestinglong1234567890abcdefghijklmno",
+            "sk-test-fakekeytestinglong1234567890abcdefghijklmnop",
         )
         _set_env("OPENAI_MODEL", "gpt-5-preview")
         Config.validate()
@@ -447,7 +448,7 @@ class TestConfigUseCase:
             # 1. Set a valid key
             _set_env(
                 "OPENAI_API_KEY",
-                "sk-proj-validkeytestinglong1234567890abcdefghijklmno",
+                "sk-test-fakekeytestinglong1234567890abcdefghijklmnop",
             )
             _set_env("OPENAI_MODEL", "gpt-4")
             _set_env("DEBUG", "false")
@@ -482,3 +483,205 @@ class TestConfigUseCase:
                 _set_env("OPENAI_API_KEY", original)
             else:
                 _unset_env("OPENAI_API_KEY")
+
+
+# ---------------------------------------------------------------------------
+# LLM Provider Tests
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.unit
+class TestLLMProviderConfig:
+    """Tests for multi-provider configuration (LLM_PROVIDER, LLM_BASE_URL, etc.)."""
+
+    _ENV_KEYS = (
+        "LLM_PROVIDER", "LLM_BASE_URL", "LLM_API_KEY",
+        "OPENAI_API_KEY", "OPENAI_MODEL", "DEBUG",
+    )
+
+    @pytest.fixture(autouse=True)
+    def _save_env(self):
+        """Save and restore provider-related env vars across tests."""
+        originals = {k: os.getenv(k) for k in self._ENV_KEYS}
+        yield
+        for k, v in originals.items():
+            if v is None:
+                _unset_env(k)
+            else:
+                _set_env(k, v)
+
+    # ---- Provider Defaults ----
+
+    def test_provider_defaults_to_openai(self):
+        """LLM_PROVIDER defaults to 'openai' when unset."""
+        _unset_env("LLM_PROVIDER")
+        assert Config.get_llm_provider() == "openai"
+
+    def test_provider_reads_env_var(self):
+        """LLM_PROVIDER reads from environment variable."""
+        _set_env("LLM_PROVIDER", "ollama")
+        assert Config.get_llm_provider() == "ollama"
+
+    def test_provider_case_insensitive(self):
+        """LLM_PROVIDER is case-insensitive."""
+        _set_env("LLM_PROVIDER", "Ollama")
+        assert Config.get_llm_provider() == "ollama"
+
+    # ---- Base URL ----
+
+    def test_base_url_none_for_openai(self):
+        """Base URL is None for OpenAI (uses LangChain default)."""
+        _unset_env("LLM_PROVIDER")
+        _unset_env("LLM_BASE_URL")
+        assert Config.get_llm_base_url() is None
+
+    def test_base_url_auto_set_for_ollama(self):
+        """Base URL is auto-set for Ollama."""
+        _set_env("LLM_PROVIDER", "ollama")
+        _unset_env("LLM_BASE_URL")
+        assert Config.get_llm_base_url() == "http://localhost:11434/v1"
+
+    def test_base_url_auto_set_for_lmstudio(self):
+        """Base URL is auto-set for LM Studio."""
+        _set_env("LLM_PROVIDER", "lmstudio")
+        _unset_env("LLM_BASE_URL")
+        assert Config.get_llm_base_url() == "http://localhost:1234/v1"
+
+    def test_base_url_explicit_override(self):
+        """Explicit LLM_BASE_URL overrides provider default."""
+        _set_env("LLM_PROVIDER", "ollama")
+        _set_env("LLM_BASE_URL", "http://remote-server:11434/v1")
+        assert Config.get_llm_base_url() == "http://remote-server:11434/v1"
+
+    # ---- API Key ----
+
+    def test_api_key_falls_back_to_openai_key(self):
+        """get_llm_api_key() falls back to OPENAI_API_KEY."""
+        _unset_env("LLM_API_KEY")
+        _set_env("OPENAI_API_KEY", "sk-test-key-fallback")
+        assert Config.get_llm_api_key() == "sk-test-key-fallback"
+
+    def test_api_key_explicit_llm_key_wins(self):
+        """Explicit LLM_API_KEY takes precedence over OPENAI_API_KEY."""
+        _set_env("LLM_API_KEY", "my-custom-key")
+        _set_env("OPENAI_API_KEY", "sk-should-not-use-this")
+        assert Config.get_llm_api_key() == "my-custom-key"
+
+    def test_api_key_not_needed_for_ollama(self):
+        """Ollama returns 'not-needed' when no key is set."""
+        _set_env("LLM_PROVIDER", "ollama")
+        _unset_env("LLM_API_KEY")
+        _unset_env("OPENAI_API_KEY")
+        assert Config.get_llm_api_key() == "not-needed"
+
+    def test_api_key_not_needed_for_lmstudio(self):
+        """LM Studio returns 'not-needed' when no key is set."""
+        _set_env("LLM_PROVIDER", "lmstudio")
+        _unset_env("LLM_API_KEY")
+        _unset_env("OPENAI_API_KEY")
+        assert Config.get_llm_api_key() == "not-needed"
+
+    def test_api_key_empty_for_openai_when_unset(self):
+        """OpenAI returns empty string when no key is set."""
+        _unset_env("LLM_PROVIDER")
+        _unset_env("LLM_API_KEY")
+        _unset_env("OPENAI_API_KEY")
+        assert Config.get_llm_api_key() == ""
+
+    # ---- Model ----
+
+    def test_model_falls_back_to_openai_model(self):
+        """get_llm_model() falls back to OPENAI_MODEL."""
+        _set_env("OPENAI_MODEL", "gpt-4-turbo")
+        assert Config.get_llm_model() == "gpt-4-turbo"
+
+    def test_model_default_for_ollama(self):
+        """Ollama defaults to 'llama3.2' when OPENAI_MODEL unset."""
+        _set_env("LLM_PROVIDER", "ollama")
+        _unset_env("OPENAI_MODEL")
+        assert Config.get_llm_model() == "llama3.2"
+
+    def test_model_default_for_lmstudio(self):
+        """LM Studio defaults to 'default' when OPENAI_MODEL unset."""
+        _set_env("LLM_PROVIDER", "lmstudio")
+        _unset_env("OPENAI_MODEL")
+        assert Config.get_llm_model() == "default"
+
+    # ---- is_local_provider ----
+
+    def test_is_local_false_for_openai(self):
+        """is_local_provider() is False for OpenAI."""
+        _unset_env("LLM_PROVIDER")
+        assert Config.is_local_provider() is False
+
+    def test_is_local_true_for_ollama(self):
+        """is_local_provider() is True for Ollama."""
+        _set_env("LLM_PROVIDER", "ollama")
+        assert Config.is_local_provider() is True
+
+    def test_is_local_true_for_lmstudio(self):
+        """is_local_provider() is True for LM Studio."""
+        _set_env("LLM_PROVIDER", "lmstudio")
+        assert Config.is_local_provider() is True
+
+    # ---- Validation ----
+
+    def test_validate_passes_for_ollama_without_api_key(self):
+        """validate() passes for Ollama even without an API key."""
+        _set_env("LLM_PROVIDER", "ollama")
+        _unset_env("OPENAI_API_KEY")
+        _unset_env("LLM_API_KEY")
+        _set_env("OPENAI_MODEL", "llama3.2")
+        assert Config.validate() is True
+
+    def test_validate_passes_for_lmstudio_without_api_key(self):
+        """validate() passes for LM Studio even without an API key."""
+        _set_env("LLM_PROVIDER", "lmstudio")
+        _unset_env("OPENAI_API_KEY")
+        _unset_env("LLM_API_KEY")
+        _set_env("OPENAI_MODEL", "default")
+        assert Config.validate() is True
+
+    def test_validate_fails_for_openai_without_api_key(self):
+        """validate() fails for OpenAI without an API key."""
+        _unset_env("LLM_PROVIDER")
+        _unset_env("OPENAI_API_KEY")
+        _unset_env("LLM_API_KEY")
+        assert Config.validate() is False
+
+    def test_validate_rejects_unknown_provider(self, capsys):
+        """validate() fails for an unknown LLM_PROVIDER."""
+        _set_env("LLM_PROVIDER", "unknown_provider")
+        _set_env("OPENAI_API_KEY", "sk-test-fakekey1234567890abcdefghijklmnop")
+        _set_env("OPENAI_MODEL", "gpt-4")
+        result = Config.validate()
+        assert result is False
+        captured = capsys.readouterr()
+        assert "not recognized" in captured.out
+
+    def test_validate_no_model_warning_for_local(self):
+        """validate() does NOT warn about unusual models for local providers."""
+        _set_env("LLM_PROVIDER", "ollama")
+        _set_env("OPENAI_MODEL", "my-custom-finetuned-model")
+        _unset_env("OPENAI_API_KEY")
+        # Should pass without warnings about unknown models
+        assert Config.validate() is True
+
+    # ---- Backward Compatibility ----
+
+    def test_backward_compat_openai_only_env(self):
+        """Existing OPENAI_API_KEY + OPENAI_MODEL works without LLM_PROVIDER."""
+        _unset_env("LLM_PROVIDER")
+        _unset_env("LLM_API_KEY")
+        _unset_env("LLM_BASE_URL")
+        _set_env(
+            "OPENAI_API_KEY",
+            "sk-test-fakekeytestinglong1234567890abcdefghijklmnop",
+        )
+        _set_env("OPENAI_MODEL", "gpt-4")
+        assert Config.validate() is True
+        assert Config.get_llm_provider() == "openai"
+        assert Config.get_llm_base_url() is None
+        assert Config.get_llm_api_key().startswith("sk-")
+        assert Config.get_llm_model() == "gpt-4"
+

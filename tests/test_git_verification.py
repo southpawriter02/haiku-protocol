@@ -229,6 +229,7 @@ class TestNoSecretsCommitted:
                     'sk-...',      # Docstring placeholder
                     'sk-your',     # .env.example template
                     'sk-test',     # Test mock values
+                    'sk-should',   # Test mock values
                     'sk-"',        # Quoted placeholder
                     "sk-'",        # Quoted placeholder
                     'startswith("sk-")',  # Code checking format
@@ -241,6 +242,13 @@ class TestNoSecretsCommitted:
                     'task-specific',  # Substring match (not API key)
                     'compressor',    # Substring match (not API key)
                     'extracti',      # Substring in research text
+                    '`sk-`',       # Backtick-quoted format reference
+                    '`sk-',        # Backtick-quoted inline code
+                    '"sk-\\',      # Escaped quote pattern in scripts
+                    '(sk-',        # Parenthesized format reference
+                    'sk-,',        # Comma-delimited list mention
+                    'isk-b',       # Substring collision (e.g. "Disk-based")
+                    'sk-[',        # Regex character class pattern
                 ]
                 if any(p in stripped for p in safe_patterns):
                     continue

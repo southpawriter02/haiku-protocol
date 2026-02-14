@@ -10,6 +10,10 @@ import logging
 
 import pytest
 
+# Skip entire module if LLM libraries are not installed
+pytest.importorskip("langchain", reason="langchain not installed")
+pytest.importorskip("tiktoken", reason="tiktoken not installed")
+
 logger = logging.getLogger(__name__)
 
 

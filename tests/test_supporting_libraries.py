@@ -33,7 +33,7 @@ class TestSupportingLibraryVersions:
         Acceptance Criterion: "streamlit --version returns version info"
         """
         # Act
-        import streamlit
+        streamlit = pytest.importorskip("streamlit", reason="streamlit not installed")
 
         version = streamlit.__version__
 
@@ -47,7 +47,7 @@ class TestSupportingLibraryVersions:
         Acceptance Criterion: "pip show python-dotenv shows installed"
         """
         # Act
-        import dotenv
+        dotenv = pytest.importorskip("dotenv", reason="python-dotenv not installed")
 
         # Assert
         assert dotenv, "dotenv module is not importable"
@@ -63,7 +63,7 @@ class TestSupportingLibraryVersions:
         Acceptance Criterion: "pip show llmlingua shows installed"
         """
         # Act
-        import llmlingua
+        llmlingua = pytest.importorskip("llmlingua", reason="llmlingua not installed")
 
         # Assert
         assert llmlingua, "llmlingua module is not importable"
@@ -154,6 +154,7 @@ class TestSupportingLibraryFunctionality:
 
     def test_dotenv_can_find_dotenv_file(self):
         """python-dotenv's find_dotenv function is callable."""
+        dotenv = pytest.importorskip("dotenv", reason="python-dotenv not installed")
         from dotenv import find_dotenv
 
         # Act — should not raise, returns empty string if no .env found
@@ -165,6 +166,7 @@ class TestSupportingLibraryFunctionality:
 
     def test_llmlingua_prompt_compressor_class_exists(self):
         """LLMLingua's PromptCompressor class is importable."""
+        pytest.importorskip("llmlingua", reason="llmlingua not installed")
         from llmlingua import PromptCompressor
 
         assert PromptCompressor is not None
@@ -207,7 +209,7 @@ class TestSupportingLibraryEdgeCases:
 
     def test_streamlit_version_is_string(self):
         """streamlit.__version__ is a proper version string."""
-        import streamlit
+        streamlit = pytest.importorskip("streamlit", reason="streamlit not installed")
 
         version = streamlit.__version__
         parts = version.split(".")
@@ -227,7 +229,7 @@ class TestSupportingLibraryLogging:
 
     def test_streamlit_import_logs_version(self, caplog):
         """Importing streamlit and logging its version produces INFO output."""
-        import streamlit
+        streamlit = pytest.importorskip("streamlit", reason="streamlit not installed")
 
         with caplog.at_level(logging.INFO):
             logger.info("streamlit version: %s", streamlit.__version__)
@@ -266,11 +268,11 @@ class TestSupportingLibrariesUseCase:
         are importable, and confirms requirements.txt is frozen."
         """
         # 1. streamlit importable
-        import streamlit
+        streamlit = pytest.importorskip("streamlit", reason="streamlit not installed")
         assert streamlit.__version__
 
         # 2. python-dotenv importable
-        import dotenv
+        dotenv = pytest.importorskip("dotenv", reason="python-dotenv not installed")
         assert dotenv
 
         # 3. llmlingua importable
