@@ -168,10 +168,10 @@ class TestChunkerModule:
     def test_chunk_dataclass_instantiation(self):
         """Chunk dataclass can be instantiated with fields."""
         from src.chunker import Chunk
-        chunk = Chunk(text="hello", chunk_id=0, start_char=0, end_char=5, token_count=1)
-        assert chunk.text == "hello"
-        assert chunk.chunk_id == 0
-        assert chunk.token_count == 1
+        chunk = Chunk(id="chunk-001", title="Test", level=2, content="hello")
+        assert chunk.id == "chunk-001"
+        assert chunk.content == "hello"
+        assert chunk.level == 2
 
     def test_document_chunker_init_defaults(self):
         """DocumentChunker has correct default values."""
