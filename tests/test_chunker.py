@@ -2,8 +2,8 @@
 tests/test_chunker.py — Unit Tests for Chunking Module
 =======================================================
 
-Tests for the Chunk dataclass, ChunkingConfig, MarkdownChunker,
-and chunk_document() defined in src/chunker.py.
+Tests for the Chunk dataclass, ChunkingConfig, ChunkMetadata,
+MarkdownChunker, and chunk_document() defined in src/chunker.py.
 
 Test Categories (v0.2.1a — Chunk Data Model):
     - Happy Path (5): Construction, field access, defaults, repr, config
@@ -26,14 +26,24 @@ Test Categories (v0.2.1b — MarkdownChunker Core):
     - Logging (2): Init log, completion log
     - Use Case (1): Benchmark sample
 
-Versions: v0.2.1a, v0.2.1b
+Test Categories (v0.2.1c — Advanced Chunking Features):
+    - Hierarchy (6): Simple, multi-level, flat, single, preamble, mixed
+    - Merging (7): Below threshold, above, parent, sibling, none, recompute, renumber
+    - Metadata (5): Breadcrumb, section_index, total_siblings, depth, position
+    - Edge Cases (4): All below threshold, orphan, single-chunk, empty list
+    - Integration (3): Full pipeline, config forwarding, real doc
+    - Logging (2): Merge logged, hierarchy logged
+
+Versions: v0.2.1a, v0.2.1b, v0.2.1c
 """
 
 import json
 import logging
 import pathlib
 import pytest
-from src.chunker import Chunk, ChunkingConfig, MarkdownChunker, chunk_document
+from src.chunker import (
+    Chunk, ChunkingConfig, ChunkMetadata, MarkdownChunker, chunk_document,
+)
 
 
 # ---------------------------------------------------------------------------
@@ -614,4 +624,441 @@ class TestMarkdownChunker:
         assert chunks[0].id == "chunk-001"
         assert chunks[1].id == "chunk-002"
         assert chunks[2].id == "chunk-003"
+
+
+# ===================================================================
+# Parent-Child Resolution (v0.2.1c)
+# ===================================================================
+
+
+class TestParentChildResolution:
+    """Tests for hierarchy resolution. (v0.2.1c)"""
+
+    # Acceptance Criterion: "### chunks are children of preceding ## chunks"
+    def test_resolve_simple_hierarchy(self):
+        """### chunk has parent_id pointing to preceding ## chunk."""
+        doc = "## Parent\nContent A\n### Child\nContent B"
+        chunker = MarkdownChunker(ChunkingConfig(min_level=2, max_level=3))
+        chunks = chunker.chunk(doc)
+        chunks = chunker.resolve_hierarchy(chunks)
+        assert chunks[0].parent_id is None
+        assert chunks[1].parent_id == chunks[0].id
+
+    # Acceptance Criterion: "Parent resets when new ## appears"
+    def test_resolve_hierarchy_parent_reset(self):
+        """New ## ends previous ##'s scope."""
+        doc = "## A\n### A.1\n## B\n### B.1"
+        chunker = MarkdownChunker(ChunkingConfig(min_level=2, max_level=3))
+        chunks = chunker.chunk(doc)
+        chunks = chunker.resolve_hierarchy(chunks)
+        assert chunks[1].parent_id == chunks[0].id  # A.1 → A
+        assert chunks[3].parent_id == chunks[2].id  # B.1 → B
+
+    # Acceptance Criterion: "Multi-level nesting resolves correctly"
+    def test_resolve_multi_level_nesting(self):
+        """Three levels resolve parent-child chain correctly."""
+        doc = "## L2\nContent\n### L3\nContent\n#### L4\nContent"
+        config = ChunkingConfig(min_level=2, max_level=4)
+        chunker = MarkdownChunker(config)
+        chunks = chunker.chunk(doc)
+        chunks = chunker.resolve_hierarchy(chunks)
+        assert chunks[0].parent_id is None        # L2
+        assert chunks[1].parent_id == chunks[0].id  # L3 → L2
+        assert chunks[2].parent_id == chunks[1].id  # L4 → L3
+
+    # Acceptance Criterion: "Flat document has no parent relationships"
+    def test_resolve_flat_no_parents(self):
+        """All chunks at the same level have parent_id=None."""
+        doc = "## A\nContent\n## B\nContent\n## C\nContent"
+        chunker = MarkdownChunker(ChunkingConfig(min_level=2, max_level=2))
+        chunks = chunker.chunk(doc)
+        chunks = chunker.resolve_hierarchy(chunks)
+        for chunk in chunks:
+            assert chunk.parent_id is None
+
+    # Acceptance Criterion: "Single chunk has no parent"
+    def test_resolve_single_chunk(self):
+        """Single chunk remains without parent."""
+        doc = "## Only\nContent here"
+        chunker = MarkdownChunker()
+        chunks = chunker.chunk(doc)
+        chunks = chunker.resolve_hierarchy(chunks)
+        assert len(chunks) == 1
+        assert chunks[0].parent_id is None
+
+    # Acceptance Criterion: "Preamble chunk has no parent"
+    def test_resolve_preamble_has_no_parent(self):
+        """Preamble chunk (level 0) has parent_id=None."""
+        doc = "Preamble text\n\n## Section\nContent\n### Sub\nMore"
+        config = ChunkingConfig(
+            min_level=2, max_level=3, include_preamble=True,
+        )
+        chunker = MarkdownChunker(config)
+        chunks = chunker.chunk(doc)
+        chunks = chunker.resolve_hierarchy(chunks)
+        assert chunks[0].title == "(Preamble)"
+        assert chunks[0].parent_id is None
+        # ## Section has no parent (preamble is level 0, popped off stack)
+        assert chunks[1].parent_id is None
+        assert chunks[2].parent_id == chunks[1].id  # ### Sub → ## Section
+
+
+# ===================================================================
+# Small Chunk Merging (v0.2.1c)
+# ===================================================================
+
+
+class TestSmallChunkMerging:
+    """Tests for chunk merging. (v0.2.1c)"""
+
+    # Acceptance Criterion: "Chunks below threshold are merged"
+    def test_merge_below_threshold(self):
+        """Chunk with < 15 words merged into parent."""
+        doc = (
+            "## Parent\n"
+            + "Lots of content here to exceed the merge threshold easily. " * 5
+            + "\n### Tiny\nShort."
+        )
+        config = ChunkingConfig(min_level=2, max_level=3, merge_threshold=15)
+        chunker = MarkdownChunker(config)
+        chunks = chunker.chunk(doc)
+        chunks = chunker.resolve_hierarchy(chunks)
+        original_count = len(chunks)
+        merged = chunker.merge_small_chunks(chunks)
+        assert len(merged) < original_count
+
+    # Acceptance Criterion: "Chunks above threshold are kept"
+    def test_merge_above_threshold_kept(self):
+        """Chunk meeting word threshold is not merged."""
+        doc = (
+            "## Parent\n"
+            + "Word " * 20
+            + "\n### Big Subsection\n"
+            + "Word " * 20
+        )
+        config = ChunkingConfig(min_level=2, max_level=3, merge_threshold=15)
+        chunker = MarkdownChunker(config)
+        chunks = chunker.chunk(doc)
+        chunks = chunker.resolve_hierarchy(chunks)
+        count_before = len(chunks)
+        merged = chunker.merge_small_chunks(chunks)
+        assert len(merged) == count_before
+
+    # Acceptance Criterion: "merge_strategy='parent' merges into parent chunk"
+    def test_merge_parent_strategy(self):
+        """Parent merge appends child content to parent."""
+        config = ChunkingConfig(
+            min_level=2, max_level=3,
+            merge_threshold=15, merge_strategy="parent",
+        )
+        chunker = MarkdownChunker(config)
+        chunks = [
+            Chunk(id="chunk-001", title="Parent", level=2,
+                  content="Word " * 20, word_count=20, char_count=100),
+            Chunk(id="chunk-002", title="Child", level=3,
+                  content="Short", word_count=1, char_count=5,
+                  parent_id="chunk-001"),
+        ]
+        merged = chunker.merge_small_chunks(chunks)
+        assert len(merged) == 1
+        assert "Short" in merged[0].content
+
+    # Acceptance Criterion: "merge_strategy='sibling' merges into previous same-level chunk"
+    def test_merge_sibling_strategy(self):
+        """Sibling merge appends to previous chunk at same level."""
+        config = ChunkingConfig(
+            min_level=2, max_level=2,
+            merge_threshold=15, merge_strategy="sibling",
+        )
+        chunker = MarkdownChunker(config)
+        chunks = [
+            Chunk(id="chunk-001", title="First", level=2,
+                  content="Word " * 20, word_count=20, char_count=100),
+            Chunk(id="chunk-002", title="Second", level=2,
+                  content="Tiny", word_count=1, char_count=4),
+        ]
+        merged = chunker.merge_small_chunks(chunks)
+        assert len(merged) == 1
+        assert "Tiny" in merged[0].content
+
+    # Acceptance Criterion: "Merge strategy 'none' preserves all chunks"
+    def test_merge_none_strategy_preserves_all(self):
+        """No merging when strategy is 'none'."""
+        config = ChunkingConfig(merge_strategy="none")
+        chunker = MarkdownChunker(config)
+        chunks = [
+            Chunk(id="chunk-001", title="A", level=2, content="Short",
+                  word_count=1, char_count=5),
+        ]
+        merged = chunker.merge_small_chunks(chunks)
+        assert len(merged) == 1
+
+    # Acceptance Criterion: "Merge recomputes word_count and char_count"
+    def test_merge_recomputes_stats(self):
+        """After merge, target chunk has updated word and char counts."""
+        config = ChunkingConfig(
+            min_level=2, max_level=3,
+            merge_threshold=15, merge_strategy="parent",
+        )
+        chunker = MarkdownChunker(config)
+        parent_content = "Word " * 20
+        chunks = [
+            Chunk(id="chunk-001", title="Parent", level=2,
+                  content=parent_content, word_count=20,
+                  char_count=len(parent_content)),
+            Chunk(id="chunk-002", title="Child", level=3,
+                  content="Extra words here", word_count=3, char_count=16,
+                  parent_id="chunk-001"),
+        ]
+        merged = chunker.merge_small_chunks(chunks)
+        assert merged[0].word_count > 20
+        assert merged[0].char_count > len(parent_content)
+
+    # Acceptance Criterion: "Chunk IDs are renumbered after merge"
+    def test_merge_renumbers_ids(self):
+        """Remaining chunks have sequential IDs after merge."""
+        config = ChunkingConfig(
+            min_level=2, max_level=3,
+            merge_threshold=15, merge_strategy="parent",
+        )
+        chunker = MarkdownChunker(config)
+        chunks = [
+            Chunk(id="chunk-001", title="Parent", level=2,
+                  content="Word " * 20, word_count=20, char_count=100),
+            Chunk(id="chunk-002", title="Tiny", level=3,
+                  content="Short", word_count=1, char_count=5,
+                  parent_id="chunk-001"),
+            Chunk(id="chunk-003", title="BigSec", level=2,
+                  content="Word " * 20, word_count=20, char_count=100),
+        ]
+        merged = chunker.merge_small_chunks(chunks)
+        assert len(merged) == 2
+        assert merged[0].id == "chunk-001"
+        assert merged[1].id == "chunk-002"
+
+
+# ===================================================================
+# Chunk Metadata Enrichment (v0.2.1c)
+# ===================================================================
+
+
+class TestChunkMetadata:
+    """Tests for metadata enrichment. (v0.2.1c)"""
+
+    # Acceptance Criterion: "Breadcrumb includes ancestor titles"
+    def test_breadcrumb_generation(self):
+        """Breadcrumb lists ancestor titles in order."""
+        doc = "## Installation\n### Prerequisites\nContent"
+        chunker = MarkdownChunker(ChunkingConfig(min_level=2, max_level=3))
+        chunks = chunker.chunk(doc)
+        chunks = chunker.resolve_hierarchy(chunks)
+        enriched = chunker.enrich_metadata(chunks)
+        _, meta = enriched[1]  # Prerequisites
+        assert meta.breadcrumb == ["Installation", "Prerequisites"]
+
+    # Acceptance Criterion: "section_index is 0-based among siblings"
+    def test_section_index(self):
+        """section_index reflects position among same-parent chunks."""
+        doc = "## A\n### A.1\nContent\n### A.2\nContent"
+        chunker = MarkdownChunker(ChunkingConfig(min_level=2, max_level=3))
+        chunks = chunker.chunk(doc)
+        chunks = chunker.resolve_hierarchy(chunks)
+        enriched = chunker.enrich_metadata(chunks)
+        _, meta_a1 = enriched[1]
+        _, meta_a2 = enriched[2]
+        assert meta_a1.section_index == 0
+        assert meta_a2.section_index == 1
+
+    # Acceptance Criterion: "total_siblings counts siblings correctly"
+    def test_total_siblings(self):
+        """total_siblings counts all chunks sharing the same parent."""
+        doc = "## A\n### A.1\nContent\n### A.2\nContent\n### A.3\nContent"
+        chunker = MarkdownChunker(ChunkingConfig(min_level=2, max_level=3))
+        chunks = chunker.chunk(doc)
+        chunks = chunker.resolve_hierarchy(chunks)
+        enriched = chunker.enrich_metadata(chunks)
+        for i in range(1, 4):
+            _, meta = enriched[i]
+            assert meta.total_siblings == 3
+
+    # Acceptance Criterion: "Depth reflects nesting level"
+    def test_depth(self):
+        """depth is 0 for top-level, 1 for children."""
+        doc = "## Top\nContent\n### Sub\nContent"
+        chunker = MarkdownChunker(ChunkingConfig(min_level=2, max_level=3))
+        chunks = chunker.chunk(doc)
+        chunks = chunker.resolve_hierarchy(chunks)
+        enriched = chunker.enrich_metadata(chunks)
+        _, meta_top = enriched[0]
+        _, meta_sub = enriched[1]
+        assert meta_top.depth == 0
+        assert meta_sub.depth == 1
+
+    # Acceptance Criterion: "document_position ranges from 0.0 to 1.0"
+    def test_document_position(self):
+        """First chunk is 0.0, last chunk is 1.0."""
+        doc = "## A\nContent\n## B\nContent\n## C\nContent"
+        chunker = MarkdownChunker(ChunkingConfig(min_level=2, max_level=2))
+        chunks = chunker.chunk(doc)
+        chunks = chunker.resolve_hierarchy(chunks)
+        enriched = chunker.enrich_metadata(chunks)
+        _, meta_first = enriched[0]
+        _, meta_last = enriched[-1]
+        assert meta_first.document_position == pytest.approx(0.0)
+        assert meta_last.document_position == pytest.approx(1.0)
+
+
+# ===================================================================
+# Advanced Edge Cases (v0.2.1c)
+# ===================================================================
+
+
+class TestAdvancedEdgeCases:
+    """Edge cases for v0.2.1c features."""
+
+    # Acceptance Criterion: "All chunks below threshold handled gracefully"
+    def test_all_chunks_below_threshold(self):
+        """When all chunks are below threshold, top-level kept standalone."""
+        config = ChunkingConfig(
+            min_level=2, max_level=2,
+            merge_threshold=100, merge_strategy="parent",
+        )
+        chunker = MarkdownChunker(config)
+        chunks = [
+            Chunk(id="chunk-001", title="A", level=2,
+                  content="Short", word_count=1, char_count=5),
+            Chunk(id="chunk-002", title="B", level=2,
+                  content="Also short", word_count=2, char_count=10),
+        ]
+        # No parent to merge into, so chunks are kept
+        merged = chunker.merge_small_chunks(chunks)
+        assert len(merged) == 2
+
+    # Acceptance Criterion: "Orphan chunk (no merge target) kept standalone"
+    def test_orphan_chunk_kept_standalone(self):
+        """Chunk with no parent and no sibling stays despite being small."""
+        config = ChunkingConfig(
+            min_level=2, max_level=3,
+            merge_threshold=100, merge_strategy="parent",
+        )
+        chunker = MarkdownChunker(config)
+        chunks = [
+            Chunk(id="chunk-001", title="Orphan", level=2,
+                  content="Tiny", word_count=1, char_count=4),
+        ]
+        merged = chunker.merge_small_chunks(chunks)
+        assert len(merged) == 1
+
+    # Acceptance Criterion: "Single-chunk document works with all features"
+    def test_single_chunk_all_features(self):
+        """Single-chunk doc works through full pipeline."""
+        doc = "## Only Section\nSome content here."
+        config = ChunkingConfig(merge_strategy="none")
+        chunker = MarkdownChunker(config)
+        chunks = chunker.chunk_with_hierarchy(doc)
+        enriched = chunker.enrich_metadata(chunks)
+        assert len(enriched) == 1
+        _, meta = enriched[0]
+        assert meta.depth == 0
+        assert meta.document_position == 0.0
+
+    # Acceptance Criterion: "Empty chunk list returns empty results"
+    def test_empty_chunk_list(self):
+        """Resolve hierarchy and enrich metadata handle empty list."""
+        chunker = MarkdownChunker()
+        resolved = chunker.resolve_hierarchy([])
+        assert resolved == []
+        enriched = chunker.enrich_metadata([])
+        assert enriched == []
+
+
+# ===================================================================
+# Integration — chunk_with_hierarchy() (v0.2.1c)
+# ===================================================================
+
+
+class TestChunkWithHierarchyIntegration:
+    """Tests for the chunk_with_hierarchy() pipeline. (v0.2.1c)"""
+
+    # Acceptance Criterion: "chunk_with_hierarchy() combines chunking + hierarchy + merging"
+    def test_full_pipeline(self):
+        """chunk_with_hierarchy() returns chunks with parent_id set."""
+        doc = "## Intro\nContent here.\n### Details\nMore content here for detail."
+        chunker = MarkdownChunker(ChunkingConfig(
+            min_level=2, max_level=3, merge_strategy="none",
+        ))
+        chunks = chunker.chunk_with_hierarchy(doc)
+        assert len(chunks) == 2
+        assert chunks[0].parent_id is None
+        assert chunks[1].parent_id == chunks[0].id
+
+    # Acceptance Criterion: "Config forwarding works for merge_strategy"
+    def test_config_forwarding(self):
+        """merge_strategy='none' skips merging even with small chunks."""
+        doc = "## Big\n" + "Word " * 20 + "\n### Small\nTiny"
+        config = ChunkingConfig(
+            min_level=2, max_level=3,
+            merge_threshold=15, merge_strategy="none",
+        )
+        chunks = MarkdownChunker(config).chunk_with_hierarchy(doc)
+        assert len(chunks) == 2  # Small chunk preserved
+
+    # Acceptance Criterion: "Real document sample works through pipeline"
+    def test_real_document_sample(self):
+        """Benchmark sample processes through full pipeline."""
+        sample_path = (
+            pathlib.Path(__file__).parent.parent
+            / "benchmarks" / "samples" / "simple.md"
+        )
+        sample = sample_path.read_text()
+        config = ChunkingConfig(
+            min_level=2, max_level=3, merge_strategy="none",
+        )
+        chunks = MarkdownChunker(config).chunk_with_hierarchy(sample)
+        assert len(chunks) >= 1
+        # All chunks have parent_id populated (or None for top-level)
+        for chunk in chunks:
+            assert hasattr(chunk, "parent_id")
+
+
+# ===================================================================
+# Logging — Advanced Features (v0.2.1c)
+# ===================================================================
+
+
+class TestAdvancedLogging:
+    """Tests for v0.2.1c logging output."""
+
+    # Acceptance Criterion: "Hierarchy resolution logged"
+    def test_hierarchy_resolution_logged(self, caplog):
+        """resolve_hierarchy() logs parent-child count at INFO."""
+        doc = "## A\n### A.1\n## B"
+        chunker = MarkdownChunker(ChunkingConfig(min_level=2, max_level=3))
+        chunks = chunker.chunk(doc)
+        with caplog.at_level(logging.INFO, logger="src.chunker"):
+            chunker.resolve_hierarchy(chunks)
+        assert any(
+            "Hierarchy resolved" in r.message for r in caplog.records
+        )
+
+    # Acceptance Criterion: "Merge operation logged"
+    def test_merge_operation_logged(self, caplog):
+        """merge_small_chunks() logs merge count at INFO."""
+        config = ChunkingConfig(
+            min_level=2, max_level=3,
+            merge_threshold=15, merge_strategy="parent",
+        )
+        chunker = MarkdownChunker(config)
+        chunks = [
+            Chunk(id="chunk-001", title="Parent", level=2,
+                  content="Word " * 20, word_count=20, char_count=100),
+            Chunk(id="chunk-002", title="Child", level=3,
+                  content="Short", word_count=1, char_count=5,
+                  parent_id="chunk-001"),
+        ]
+        with caplog.at_level(logging.INFO, logger="src.chunker"):
+            chunker.merge_small_chunks(chunks)
+        assert any(
+            "Chunk merging complete" in r.message for r in caplog.records
+        )
 
